@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Chinese Kids Adventure</title>
+
+<style>
+:root{
+    --pink:#ffd6e7;
+    --blue:#d6f0ff;
+    --yellow:#fff4bb;
+    --green:#ddffd9;
+    --purple:#e7dbff;
+    --dark:#444;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Arial",sans-serif;
+}
+
+body{
+    background:linear-gradient(
+        135deg,
+        #ffeaf4,
+        #e8f7ff
+    );
+    min-height:100vh;
+    padding:20px;
+}
+
+.container{
+    max-width:1000px;
+    margin:auto;
+}
+
+h1{
+    text-align:center;
+    font-size:2rem;
+    color:#ff5e99;
+    margin-bottom:20px;
+}
+
+.levels{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.level-btn{
+    border:none;
+    padding:20px;
+    border-radius:20px;
+    font-size:1.2rem;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.3s;
+    box-shadow:0 6px 0 rgba(0,0,0,.08);
+}
+
+.level-btn:hover{
+    transform:translateY(-3px);
+}
+
+.level1{background:var(--yellow);}
+.level2{background:var(--blue);}
+.level3{background:var(--purple);}
+
+.locked{
+    opacity:.45;
+    cursor:not-allowed;
+}
+
+.screen{
+    background:white;
+    border-radius:25px;
+    padding:25px;
+    box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.hidden{
+    display:none;
+}
+
+.word-card{
+    text-align:center;
+    padding:20px;
+}
+
+.chinese{
+    font-size:5rem;
+    color:#ff5e99;
+    margin:20px 0;
+}
+
+.pinyin{
+    font-size:2rem;
+    color:#666;
+    margin-bottom:10px;
+}
+
+.thai{
+    font-size:1.5rem;
+    margin-bottom:20px;
+}
+
+.nav{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+button{
+    border:none;
+    border-radius:15px;
+    padding:14px 18px;
+    font-size:1rem;
+    cursor:pointer;
+}
+
+.primary{
+    background:#7ed6ff;
+    color:white;
+}
+
+.secondary{
+    background:#ffd166;
+}
+
+.quiz-box{
+    text-align:center;
+}
+
+.question{
+    font-size:4rem;
+    color:#ff5e99;
+    margin:20px 0;
+}
+
+.options{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:20px;
+}
+
+.option-btn{
+    padding:16px;
+    background:#f7f7f7;
+    border-radius:15px;
+}
+
+.score{
+    font-size:1.5rem;
+    margin:15px 0;
+}
+
+.success{
+    color:green;
+    font-size:1.2rem;
+}
+
+.fail{
+    color:red;
+}
+
+.badge{
+    background:#ffe083;
+    padding:8px 14px;
+    border-radius:12px;
+    display:inline-block;
+    margin-bottom:15px;
+    font-weight:bold;
+}
+
+@media(max-width:768px){
+
+    .levels{
+        grid-template-columns:1fr;
+    }
+
+    .chinese{
+        font-size:4rem;
+    }
+
+    .question{
+        font-size:3rem;
+    }
+
+    .options{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🐼 Chinese Kids Adventure 🏆</h1>
+
+<div class="levels">
+    <button class="level-btn level1" onclick="startLevel(1)">
+        Level 1<br>ตัวเลข
+    </button>
+
+    <button id="level2Btn"
+            class="level-btn level2 locked"
+            onclick="startLevel(2)">
+        🔒 Level 2<br>ครอบครัว & สัตว์
+    </button>
+
+    <button id="level3Btn"
+            class="level-btn level3 locked"
+            onclick="startLevel(3)">
+        🔒 Level 3<br>ผลไม้ & สี
+    </button>
+</div>
+
+<div class="screen">
+
+<div id="homeScreen">
+    <h2>เลือกเลเวลเพื่อเริ่มเรียนรู้ 🎉</h2>
+</div>
+
+<div id="learnScreen" class="hidden">
+
+    <div class="badge" id="levelTitle"></div>
+
+    <div class="word-card">
+
+        <div class="chinese" id="chineseWord"></div>
+
+        <div class="pinyin" id="pinyin"></div>
+
+        <div class="thai" id="thai"></div>
+
+    </div>
+
+    <div class="nav">
+        <button class="secondary" onclick="prevWord()">⬅ ก่อนหน้า</button>
+        <button class="secondary" onclick="nextWord()">ถัดไป ➡</button>
+        <button class="primary" onclick="startQuiz()">เริ่มแบบทดสอบ 🎯</button>
+    </div>
+
+</div>
+
+<div id="quizScreen" class="hidden">
+
+    <div class="badge" id="quizLevel"></div>
+
+    <div class="quiz-box">
+
+        <p>คำนี้แปลว่าอะไร?</p>
+
+        <div class="question" id="question"></div>
+
+        <div class="options" id="options"></div>
+
+    </div>
+
+</div>
+
+<div id="resultScreen" class="hidden">
+
+    <h2>🎉 ผลการทดสอบ</h2>
+
+    <div class="score" id="finalScore"></div>
+
+    <div id="unlockMessage"></div>
+
+    <br>
+
+    <button class="primary"
+            onclick="goHome()">
+        กลับหน้าแรก
+    </button>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+/* ==================================================
+   VOCAB DATABASE
+   เพิ่มหรือลบคำศัพท์ได้ง่ายตรงนี้
+================================================== */
+
+const vocabulary = {
+
+1:[
+{cn:"一",py:"yī",th:"หนึ่ง"},
+{cn:"二",py:"èr",th:"สอง"},
+{cn:"三",py:"sān",th:"สาม"},
+{cn:"四",py:"sì",th:"สี่"},
+{cn:"五",py:"wǔ",th:"ห้า"},
+{cn:"六",py:"liù",th:"หก"},
+{cn:"七",py:"qī",th:"เจ็ด"},
+{cn:"八",py:"bā",th:"แปด"},
+{cn:"九",py:"jiǔ",th:"เก้า"},
+{cn:"十",py:"shí",th:"สิบ"},
+{cn:"百",py:"bǎi",th:"ร้อย"},
+{cn:"千",py:"qiān",th:"พัน"},
+{cn:"万",py:"wàn",th:"หมื่น"},
+{cn:"十万",py:"shí wàn",th:"แสน"},
+{cn:"百万",py:"bǎi wàn",th:"ล้าน"}
+],
+
+2:[
+{cn:"爸爸",py:"bàba",th:"พ่อ"},
+{cn:"妈妈",py:"māma",th:"แม่"},
+{cn:"哥哥",py:"gēge",th:"พี่ชาย"},
+{cn:"姐姐",py:"jiějie",th:"พี่สาว"},
+{cn:"弟弟",py:"dìdi",th:"น้องชาย"},
+{cn:"妹妹",py:"mèimei",th:"น้องสาว"},
+{cn:"爷爷",py:"yéye",th:"คุณปู่"},
+{cn:"奶奶",py:"nǎinai",th:"คุณย่า"},
+{cn:"猫",py:"māo",th:"แมว"},
+{cn:"狗",py:"gǒu",th:"สุนัข"},
+{cn:"鸟",py:"niǎo",th:"นก"},
+{cn:"鱼",py:"yú",th:"ปลา"},
+{cn:"兔子",py:"tùzi",th:"กระต่าย"},
+{cn:"熊猫",py:"xióngmāo",th:"แพนด้า"}
+],
+
+3:[
+{cn:"苹果",py:"píngguǒ",th:"แอปเปิล"},
+{cn:"香蕉",py:"xiāngjiāo",th:"กล้วย"},
+{cn:"西瓜",py:"xīguā",th:"แตงโม"},
+{cn:"橙子",py:"chéngzi",th:"ส้ม"},
+{cn:"葡萄",py:"pútáo",th:"องุ่น"},
+{cn:"草莓",py:"cǎoméi",th:"สตรอว์เบอร์รี"},
+{cn:"红色",py:"hóngsè",th:"สีแดง"},
+{cn:"蓝色",py:"lánsè",th:"สีน้ำเงิน"},
+{cn:"绿色",py:"lǜsè",th:"สีเขียว"},
+{cn:"黄色",py:"huángsè",th:"สีเหลือง"},
+{cn:"白色",py:"báisè",th:"สีขาว"},
+{cn:"黑色",py:"hēisè",th:"สีดำ"}
+]
+
+};
+
+/* =========================================== */
+
+let currentLevel=1;
+let currentIndex=0;
+
+let quizQuestions=[];
+let quizIndex=0;
+let score=0;
+
+const unlocked={
+    level2:false,
+    level3:false
+};
+
+loadProgress();
+
+function loadProgress(){
+
+    const data=
+    JSON.parse(localStorage.getItem("cnProgress"));
+
+    if(data){
+
+        unlocked.level2=data.level2;
+        unlocked.level3=data.level3;
+
+        updateLocks();
+    }
+}
+
+function saveProgress(){
+
+    localStorage.setItem(
+        "cnProgress",
+        JSON.stringify(unlocked)
+    );
+}
+
+function updateLocks(){
+
+    if(unlocked.level2){
+
+        let btn=document.getElementById("level2Btn");
+
+        btn.classList.remove("locked");
+        btn.innerHTML="Level 2<br>ครอบครัว & สัตว์";
+    }
+
+    if(unlocked.level3){
+
+        let btn=document.getElementById("level3Btn");
+
+        btn.classList.remove("locked");
+        btn.innerHTML="Level 3<br>ผลไม้ & สี";
+    }
+}
+
+function startLevel(level){
+
+    if(level===2 && !unlocked.level2) return;
+    if(level===3 && !unlocked.level3) return;
+
+    currentLevel=level;
+    currentIndex=0;
+
+    showScreen("learnScreen");
+
+    document.getElementById("levelTitle")
+        .innerText="Level "+level;
+
+    renderWord();
+}
+
+function renderWord(){
+
+    const word=
+    vocabulary[currentLevel][currentIndex];
+
+    chineseWord.innerText=word.cn;
+    pinyin.innerText=word.py;
+    thai.innerText=word.th;
+}
+
+function nextWord(){
+
+    currentIndex++;
+
+    if(currentIndex>=vocabulary[currentLevel].length){
+
+        currentIndex=0;
+    }
+
+    renderWord();
+}
+
+function prevWord(){
+
+    currentIndex--;
+
+    if(currentIndex<0){
+
+        currentIndex=
+        vocabulary[currentLevel].length-1;
+    }
+
+    renderWord();
+}
+
+function startQuiz(){
+
+    quizQuestions=
+    [...vocabulary[currentLevel]]
+    .sort(()=>Math.random()-0.5)
+    .slice(0,5);
+
+    quizIndex=0;
+    score=0;
+
+    document.getElementById("quizLevel")
+    .innerText="Level "+currentLevel;
+
+    showScreen("quizScreen");
+
+    renderQuestion();
+}
+
+function renderQuestion(){
+
+    const word=
+    quizQuestions[quizIndex];
+
+    question.innerText=word.cn;
+
+    let choices=[word.th];
+
+    while(choices.length<4){
+
+        const random=
+        vocabulary[currentLevel]
+        [Math.floor(
+           Math.random()*
+           vocabulary[currentLevel].length
+        )].th;
+
+        if(!choices.includes(random)){
+
+            choices.push(random);
+        }
+    }
+
+    choices.sort(()=>Math.random()-0.5);
+
+    options.innerHTML="";
+
+    choices.forEach(choice=>{
+
+        const btn=
+        document.createElement("button"
