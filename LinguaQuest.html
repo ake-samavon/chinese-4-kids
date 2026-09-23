@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>LinguaQuest — เรียนภาษาจีน & อังกฤษ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/hanzi-writer@3.5/dist/hanzi-writer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: { 50:'#f5f3ff',100:'#ede9fe',200:'#ddd6fe',300:'#c4b5fd',400:'#a78bfa',500:'#8b5cf6',600:'#7c3aed',700:'#6d28d9' },
+        accent: { 50:'#fdf2f8',100:'#fce7f3',200:'#fbcfe8',300:'#f9a8d4',400:'#f472b6',500:'#ec4899' },
+        cn: { 500:'#ef4444',600:'#dc2626' },
+        en: { 500:'#3b82f6',600:'#2563eb' }
+      }
+    }
+  }
+}
+</script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&family=Noto+Sans+Thai:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:'Noto Sans Thai','Inter',sans-serif;background:linear-gradient(135deg,#f5f3ff 0%,#fdf2f8 50%,#e0f2fe 100%);min-height:100vh;overflow-x:hidden}
+.page{display:none;padding:16px 16px 90px;max-width:480px;margin:0 auto;animation:fadeIn .3s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounceIn{0%{transform:scale(0.3);opacity:0}50%{transform:scale(1.05)}70%{transform:scale(0.9)}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes coinSpin{0%{transform:rotateY(0)}100%{transform:rotateY(360deg)}}
+@keyframes popIn{0%{transform:scale(0)}50%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes gradientMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+.animate-bounce-in{animation:bounceIn .5s ease}
+.animate-shake{animation:shake .4s ease}
+.animate-pulse-custom{animation:pulse .6s ease}
+.animate-float{animation:float 3s ease-in-out infinite}
+.animate-slide-up{animation:slideUp .4s ease}
+.animate-pop{animation:popIn .3s ease}
+.glass{background:rgba(255,255,255,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.3)}
+.card-shadow{box-shadow:0 4px 20px rgba(0,0,0,0.08)}
+.btn-press{transition:transform .1s}
+.btn-press:active{transform:scale(0.95)}
+#toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:999;transition:all .3s ease;opacity:0;pointer-events:none}
+#toast.show{opacity:1;pointer-events:auto}
+.quiz-opt{transition:all .2s ease}
+.quiz-opt:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+.quiz-opt.correct{background:#dcfce7!important;border-color:#22c55e!important}
+.quiz-opt.wrong{background:#fee2e2!important;border-color:#ef4444!important}
+.chip{display:inline-block;padding:8px 16px;margin:4px;border-radius:12px;cursor:pointer;user-select:none;transition:all .15s ease;font-weight:600}
+.chip:active{transform:scale(0.92)}
+.chip.placed{opacity:0.4;pointer-events:none}
+.drop-zone{min-height:48px;border:2px dashed #c4b5fd;border-radius:12px;display:flex;flex-wrap:wrap;align-items:center;padding:6px;gap:4px;transition:all .2s ease}
+.drop-zone.over{border-color:#8b5cf6;background:rgba(139,92,246,0.05)}
+.balloon{position:absolute;cursor:pointer;transition:transform .15s;user-select:none;font-size:3rem}
+.balloon:hover{transform:scale(1.15)}
+.game-card{transition:all .3s ease;cursor:pointer}
+.game-card:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,0.12)}
+.word-card{perspective:1000px}
+.word-card-inner{transition:transform .5s;transform-style:preserve-3d}
+.word-card.flipped .word-card-inner{transform:rotateY(180deg)}
+.word-card-front,.word-card-back{backface-visibility:hidden;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border-radius:16px}
+.word-card-back{transform:rotateY(180deg)}
+.match-card{transition:all .3s ease;cursor:pointer}
+.match-card.matched{opacity:0.3;pointer-events:none;transform:scale(0.9)}
+.match-card.selected{ring:3px solid #8b5cf6;transform:scale(1.05)}
+.nav-item{transition:all .2s ease}
+.nav-item.active{color:#7c3aed}
+.nav-item.active .nav-dot{width:4px;height:4px;background:#7c3aed;border-radius:50%;margin-top:2px}
+.streak-fire{display:inline-block;animation:pulse 1.5s ease-in-out infinite}
+.xp-fill{transition:width .8s ease}
+canvas#radarChart{max-width:300px;max-height:300px}
+.unit-card{transition:all .2s ease}
+.unit-card:hover:not(.locked){transform:translateY(-3px)}
+.unit-card.locked{opacity:0.5;filter:grayscale(0.5)}
+.heatmap-cell{width:14px;height:14px;border-radius:3px;display:inline-block;margin:1px}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header id="header" class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/30" style="padding:8px 16px">
+  <div class="max-w-[480px] mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent">LQ</span>
+      <span id="streakBadge" class="streak-fire text-sm font-bold cursor-pointer" onclick="App.showPage('profile')">🔥 <span id="streakCount">0</span></span>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1 text-sm font-semibold text-yellow-600 cursor-pointer" onclick="Shop.show()">
+        🪙 <span id="coinCount">0</span>
+      </div>
+      <div class="flex items-center gap-1 bg-primary-100 rounded-full px-2 py-1 cursor-pointer" onclick="App.showPage('profile')">
+        <span class="text-xs font-bold text-primary-700">Lv.<span id="levelNum">1</span></span>
+        <div class="w-16 h-2 bg-primary-200 rounded-full overflow-hidden">
+          <div id="xpBar" class="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full xp-fill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===== TOAST ===== -->
+<div id="toast" class="glass rounded-2xl px-5 py-3 text-sm font-semibold shadow-lg flex items-center gap-2"></div>
+
+<!-- ===== ONBOARDING ===== -->
+<div id="onboarding" class="fixed inset-0 z-[100] bg-gradient-to-br from-primary-100 via-accent-50 to-sky-100 flex items-center justify-center hidden">
+  <div class="max-w-[420px] w-full mx-4">
+    <!-- Step 1: Welcome -->
+    <div id="ob-step1" class="text-center animate-bounce-in">
+      <div class="text-6xl mb-4 animate-float">🌏</div>
+      <h1 class="text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent mb-2">ยินดีต้อนรับสู่ LinguaQuest!</h1>
+      <p class="text-gray-500 mb-6">มาเริ่มต้นการผจญภัยทางภาษากัน<br>สร้างโปรไฟล์ของคุณเลย ✨</p>
+      <button onclick="Onboarding.goStep(2)" class="px-8 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-2xl font-bold text-lg btn-press shadow-lg hover:shadow-xl transition-shadow">เริ่มเลย! 🚀</button>
+    </div>
+    <!-- Step 2: Name -->
+    <div id="ob-step2" class="hidden animate-slide-up">
+      <div class="glass rounded-3xl p-6 card-shadow">
+        <div class="text-center mb-4">
+          <div class="text-4xl mb-2">✏️</div>
+          <h2 class="text-lg font-bold text-gray-800">คุณชื่ออะไร?</h2>
+          <p class="text-sm text-gray-500">ตั้งชื่อเล่นที่ต้องการแสดงในแอป</p>
+        </div>
+        <input id="ob-name" type="text" placeholder="พิมพ์ชื่อเล่นของคุณ..." maxlength="20"
+          class="w-full px-4 py-3 rounded-xl border-2 border-primary-200 text-center text-lg font-bold focus:outline-none focus:border-primary-500 transition-colors bg-white"
+          onkeydown="if(event.key==='Enter')Onboarding.goStep(3)">
+        <button onclick="Onboarding.goStep(3)" class="w-full mt-4 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-xl font-bold btn-press">ถัดไป →</button>
+      </div>
+    </div>
+    <!-- Step 3: Avatar -->
+    <div id="ob-step3" class="hidden animate-slide-up">
+      <div class="glass rounded-3xl p-6 card-shadow">
+        <div class="text-center mb-4">
+          <div class="text-4xl mb-2" id="ob-avatar-preview">🧑‍🎓</div>
+          <h2 class="text-lg font-bold text-gray-800">เลือก Avatar ของคุณ</h2>
+          <p class="text-sm text-gray-500">เลือกตัวแทนที่ชอบ</p>
+        </div>
+        <div class="grid grid-cols-5 gap-2 mb-4" id="ob-avatar-grid"></div>
+        <button onclick="Onboarding.goStep(4)" class="w-full py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-xl font-bold btn-press">ถัดไป →</button>
+      </div>
+    </div>
+    <!-- Step 4: Goal -->
+    <div id="ob-step4" class="hidden animate-slide-up">
+      <div class="glass rounded-3xl p-6 card-shadow">
+        <div class="text-center mb-4">
+          <div class="text-4xl mb-2">🎯</div>
+          <h2 class="text-lg font-bold text-gray-800">เป้าหมายของคุณ</h2>
+          <p class="text-sm text-gray-500">คุณอยากเรียนภาษาอะไร?</p>
+        </div>
+        <div class="space-y-2 mb-4">
+          <button onclick="Onboarding.setGoal('both')" id="ob-goal-both" class="w-full p-3 rounded-xl border-2 border-primary-300 bg-primary-50 text-left flex items-center gap-3 btn-press">
+            <span class="text-2xl">🌏</span><div><div class="font-bold text-gray-800">จีน + อังกฤษ</div><div class="text-xs text-gray-500">เรียนทั้งสองภาษา</div></div>
+          </button>
+          <button onclick="Onboarding.setGoal('cn')" id="ob-goal-cn" class="w-full p-3 rounded-xl border-2 border-gray-200 bg-white text-left flex items-center gap-3 btn-press">
+            <span class="text-2xl">🇨🇳</span><div><div class="font-bold text-gray-800">ภาษาจีน</div><div class="text-xs text-gray-500">เน้นภาษาจีนกลาง</div></div>
+          </button>
+          <button onclick="Onboarding.setGoal('en')" id="ob-goal-en" class="w-full p-3 rounded-xl border-2 border-gray-200 bg-white text-left flex items-center gap-3 btn-press">
+            <span class="text-2xl">🇬🇧</span><div><div class="font-bold text-gray-800">ภาษาอังกฤษ</div><div class="text-xs text-gray-500">เน้นภาษาอังกฤษ</div></div>
+          </button>
+        </div>
+        <button onclick="Onboarding.finish()" class="w-full py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-xl font-bold btn-press text-lg">🎉 เริ่มเรียนเลย!</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGES ===== -->
+<div style="padding-top:56px">
+
+<!-- Dashboard -->
+<div id="page-dashboard" class="page active">
+  <div class="text-center mb-4 animate-slide-up">
+    <div class="text-4xl mb-1 animate-float" id="dashAvatar">🌏</div>
+    <h1 class="text-xl font-bold text-gray-800" id="dashName">สวัสดี, นักสำรวจ!</h1>
+    <p class="text-sm text-gray-500" id="dashGreeting">มาเรียนภาษากันเถอะ</p>
+  </div>
+
+  <!-- Daily Quests -->
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow animate-slide-up" style="animation-delay:.1s">
+    <h3 class="font-bold text-gray-700 mb-3 flex items-center gap-2">📋 ภารกิจประจำวัน <span id="questTimer" class="text-xs text-gray-400 ml-auto"></span></h3>
+    <div id="questList" class="space-y-2"></div>
+  </div>
+
+  <!-- Continue Learning -->
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow animate-slide-up" style="animation-delay:.2s">
+    <h3 class="font-bold text-gray-700 mb-3">📖 เรียนต่อ</h3>
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="App.showUnits('cn')" class="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-200 rounded-2xl p-4 text-center btn-press hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-1">🇨🇳</div>
+        <div class="font-bold text-red-700 text-sm">ภาษาจีน</div>
+        <div class="text-xs text-red-500 mt-1" id="cnProgress">0% สำเร็จ</div>
+      </button>
+      <button onclick="App.showUnits('en')" class="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-4 text-center btn-press hover:shadow-md transition-shadow">
+        <div class="text-3xl mb-1">🇬🇧</div>
+        <div class="font-bold text-blue-700 text-sm">ภาษาอังกฤษ</div>
+        <div class="text-xs text-blue-500 mt-1" id="enProgress">0% สำเร็จ</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Quick Games -->
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow animate-slide-up" style="animation-delay:.3s">
+    <h3 class="font-bold text-gray-700 mb-3">🎮 เล่นเกม</h3>
+    <div class="flex gap-2 overflow-x-auto pb-2">
+      <button onclick="Games.start('speedmatch')" class="flex-shrink-0 bg-gradient-to-br from-emerald-400 to-teal-500 text-white rounded-2xl px-4 py-3 text-center btn-press min-w-[100px]">
+        <div class="text-2xl">⚡</div><div class="text-xs font-bold mt-1">Speed Match</div>
+      </button>
+      <button onclick="Games.start('balloon')" class="flex-shrink-0 bg-gradient-to-br from-pink-400 to-rose-500 text-white rounded-2xl px-4 py-3 text-center btn-press min-w-[100px]">
+        <div class="text-2xl">🎈</div><div class="text-xs font-bold mt-1">Tone Pop</div>
+      </button>
+      <button onclick="Games.start('wordrain')" class="flex-shrink-0 bg-gradient-to-br from-sky-400 to-blue-500 text-white rounded-2xl px-4 py-3 text-center btn-press min-w-[100px]">
+        <div class="text-2xl">🌧️</div><div class="text-xs font-bold mt-1">Word Rain</div>
+      </button>
+      <button onclick="Games.start('scramble')" class="flex-shrink-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white rounded-2xl px-4 py-3 text-center btn-press min-w-[100px]">
+        <div class="text-2xl">🧩</div><div class="text-xs font-bold mt-1">Scramble</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Leaderboard Preview -->
+  <div class="glass rounded-2xl p-4 card-shadow animate-slide-up cursor-pointer" style="animation-delay:.4s" onclick="Leaderboard.show()">
+    <h3 class="font-bold text-gray-700 mb-2 flex items-center gap-2">🏆 ลีดเดอร์บอร์ด <span class="text-xs text-gray-400 ml-auto">ดูทั้งหมด →</span></h3>
+    <div id="leaderPreview" class="flex items-center gap-3"></div>
+  </div>
+</div>
+
+<!-- Unit Selection -->
+<div id="page-units" class="page">
+  <div class="flex items-center gap-3 mb-4">
+    <button onclick="App.showPage('dashboard')" class="text-2xl btn-press">←</button>
+    <h2 id="unitsTitle" class="font-bold text-lg text-gray-800"></h2>
+  </div>
+  <div id="unitsList" class="space-y-3"></div>
+</div>
+
+<!-- Lesson -->
+<div id="page-lesson" class="page">
+  <div class="flex items-center gap-3 mb-3">
+    <button onclick="Lesson.exit()" class="text-xl btn-press text-gray-500">✕</button>
+    <div class="flex-1 h-3 bg-gray-200 rounded-full overflow-hidden">
+      <div id="lessonBar" class="h-full bg-gradient-to-r from-primary-500 to-accent-500 rounded-full transition-all duration-500" style="width:0%"></div>
+    </div>
+    <span id="lessonStep" class="text-xs font-bold text-gray-500">1/6</span>
+  </div>
+  <div id="lessonContent" class="min-h-[60vh]"></div>
+</div>
+
+<!-- Mini-Games Hub -->
+<div id="page-games" class="page">
+  <h2 class="font-bold text-lg text-gray-800 mb-4">🎮 มินิเกม</h2>
+  <div class="space-y-3">
+    <div onclick="Games.start('speedmatch')" class="game-card glass rounded-2xl p-4 flex items-center gap-4 card-shadow">
+      <div class="text-4xl bg-gradient-to-br from-emerald-100 to-teal-100 rounded-2xl w-16 h-16 flex items-center justify-center">⚡</div>
+      <div><div class="font-bold text-gray-800">Speed Match</div><div class="text-xs text-gray-500">จับคู่คำศัพท์กับความหมาย ฝึกความจำและความเร็ว</div></div>
+    </div>
+    <div onclick="Games.start('balloon')" class="game-card glass rounded-2xl p-4 flex items-center gap-4 card-shadow">
+      <div class="text-4xl bg-gradient-to-br from-pink-100 to-rose-100 rounded-2xl w-16 h-16 flex items-center justify-center">🎈</div>
+      <div><div class="font-bold text-gray-800">Tone Balloon Pop</div><div class="text-xs text-gray-500">ฟังเสียงวรรณยุกต์จีน แล้วแตะลูกโป่งให้ถูกต้อง</div></div>
+    </div>
+    <div onclick="Games.start('wordrain')" class="game-card glass rounded-2xl p-4 flex items-center gap-4 card-shadow">
+      <div class="text-4xl bg-gradient-to-br from-sky-100 to-blue-100 rounded-2xl w-16 h-16 flex items-center justify-center">🌧️</div>
+      <div><div class="font-bold text-gray-800">Word Rain</div><div class="text-xs text-gray-500">คำศัพท์ตกลงมา! เลือกคำแปลให้ทันก่อนตกถึงพื้น</div></div>
+    </div>
+    <div onclick="Games.start('scramble')" class="game-card glass rounded-2xl p-4 flex items-center gap-4 card-shadow">
+      <div class="text-4xl bg-gradient-to-br from-amber-100 to-orange-100 rounded-2xl w-16 h-16 flex items-center justify-center">🧩</div>
+      <div><div class="font-bold text-gray-800">Sentence Scramble</div><div class="text-xs text-gray-500">เรียงคำให้เป็นประโยคที่ถูกต้อง ฝึกไวยากรณ์</div></div>
+    </div>
+  </div>
+  <div class="mt-4 glass rounded-2xl p-4 card-shadow">
+    <h3 class="font-bold text-sm text-gray-600 mb-2">เลือกภาษาสำหรับเกม</h3>
+    <div class="flex gap-2">
+      <button onclick="Games.setLang('cn')" id="gameLangCn" class="flex-1 py-2 rounded-xl font-bold text-sm btn-press bg-red-100 text-red-700 border-2 border-red-300">🇨🇳 จีน</button>
+      <button onclick="Games.setLang('en')" id="gameLangEn" class="flex-1 py-2 rounded-xl font-bold text-sm btn-press bg-gray-100 text-gray-500 border-2 border-gray-200">🇬🇧 อังกฤษ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Game Play -->
+<div id="page-gameplay" class="page">
+  <div class="flex items-center gap-3 mb-3">
+    <button onclick="Games.exit()" class="text-xl btn-press text-gray-500">✕</button>
+    <h3 id="gameTitle" class="font-bold text-gray-800 flex-1"></h3>
+    <div id="gameTimer" class="text-sm font-bold text-primary-600"></div>
+    <div id="gameScore" class="text-sm font-bold text-yellow-600"></div>
+  </div>
+  <div id="gameArea" class="min-h-[65vh] relative"></div>
+</div>
+
+<!-- SRS Review -->
+<div id="page-review" class="page">
+  <h2 class="font-bold text-lg text-gray-800 mb-2">📚 ทบทวนคำศัพท์</h2>
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow">
+    <div class="flex items-center justify-between mb-3">
+      <span class="text-sm text-gray-600">คำที่ต้องทบทวนวันนี้</span>
+      <span id="reviewDueCount" class="text-2xl font-bold text-primary-600">0</span>
+    </div>
+    <div class="grid grid-cols-5 gap-1 text-center text-xs mb-3" id="boxStats"></div>
+    <button onclick="SRS.startReview()" id="btnStartReview" class="w-full py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white font-bold rounded-xl btn-press disabled:opacity-50">เริ่มทบทวน</button>
+  </div>
+  <div id="reviewArea" class="hidden"></div>
+  <div class="glass rounded-2xl p-4 card-shadow">
+    <h3 class="font-bold text-sm text-gray-600 mb-2">📊 สถิติ Box</h3>
+    <div id="boxBars" class="space-y-2"></div>
+  </div>
+</div>
+
+<!-- Profile -->
+<div id="page-profile" class="page">
+  <div class="text-center mb-4">
+    <div id="profAvatarBig" class="w-20 h-20 mx-auto bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center text-3xl mb-2 shadow-lg">🧑‍🎓</div>
+    <h2 class="font-bold text-lg text-gray-800" id="profName">นักสำรวจภาษา</h2>
+    <p class="text-sm text-gray-500">Level <span id="profLevel">1</span> • <span id="profXP">0</span> XP</p>
+    <button onclick="ProfileEditor.show()" class="mt-2 px-4 py-1.5 bg-white border-2 border-primary-200 rounded-full text-xs font-bold text-primary-600 btn-press hover:bg-primary-50 transition-colors">✏️ แก้ไขโปรไฟล์</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-3 gap-2 mb-4">
+    <div class="glass rounded-xl p-3 text-center card-shadow"><div class="text-2xl">🔥</div><div class="font-bold text-gray-800" id="profStreak">0</div><div class="text-xs text-gray-500">Streak</div></div>
+    <div class="glass rounded-xl p-3 text-center card-shadow"><div class="text-2xl">📚</div><div class="font-bold text-gray-800" id="profWords">0</div><div class="text-xs text-gray-500">คำศัพท์</div></div>
+    <div class="glass rounded-xl p-3 text-center card-shadow"><div class="text-2xl">🪙</div><div class="font-bold text-yellow-600" id="profCoins">0</div><div class="text-xs text-gray-500">เหรียญ</div></div>
+  </div>
+
+  <!-- Radar Chart -->
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow">
+    <h3 class="font-bold text-sm text-gray-600 mb-2">🎯 ทักษะ</h3>
+    <canvas id="radarChart" width="300" height="300" class="mx-auto"></canvas>
+  </div>
+
+  <!-- Activity Heatmap -->
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow">
+    <h3 class="font-bold text-sm text-gray-600 mb-2">📅 กิจกรรม (30 วันล่าสุด)</h3>
+    <div id="heatmap" class="flex flex-wrap gap-[2px] justify-center"></div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="glass rounded-2xl p-4 mb-4 card-shadow">
+    <h3 class="font-bold text-sm text-gray-600 mb-3">🏅 เหรียญรางวัล</h3>
+    <div id="badgeGrid" class="grid grid-cols-3 gap-3"></div>
+  </div>
+
+  <!-- Vocab Compendium -->
+  <div class="glass rounded-2xl p-4 card-shadow">
+    <h3 class="font-bold text-sm text-gray-600 mb-2 flex items-center justify-between">
+      📖 คลังคำศัพท์
+      <div class="flex gap-1">
+        <button onclick="Profile.filterCompendium('all')" class="text-xs px-2 py-1 rounded-lg bg-gray-100 btn-press" id="compAll">ทั้งหมด</button>
+        <button onclick="Profile.filterCompendium('cn')" class="text-xs px-2 py-1 rounded-lg bg-gray-100 btn-press" id="compCn">🇨🇳</button>
+        <button onclick="Profile.filterCompendium('en')" class="text-xs px-2 py-1 rounded-lg bg-gray-100 btn-press" id="compEn">🇬🇧</button>
+      </div>
+    </h3>
+    <div id="compendiumList" class="max-h-[300px] overflow-y-auto space-y-1"></div>
+  </div>
+</div>
+
+</div><!-- /pages wrapper -->
+
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 glass border-t border-white/30" style="padding-bottom:env(safe-area-inset-bottom)">
+  <div class="max-w-[480px] mx-auto grid grid-cols-5 py-2">
+    <button onclick="App.showPage('dashboard')" class="nav-item flex flex-col items-center gap-0.5 active" data-nav="dashboard">
+      <span class="text-xl">🏠</span><span class="text-[10px] font-semibold">หน้าแรก</span><div class="nav-dot"></div>
+    </button>
+    <button onclick="App.showPage('dashboard');document.querySelector('[onclick*=showUnits]').click()" class="nav-item flex flex-col items-center gap-0.5" data-nav="learn">
+      <span class="text-xl">📖</span><span class="text-[10px] font-semibold">เรียน</span><div class="nav-dot"></div>
+    </button>
+    <button onclick="App.showPage('games')" class="nav-item flex flex-col items-center gap-0.5" data-nav="games">
+      <span class="text-xl">🎮</span><span class="text-[10px] font-semibold">เกม</span><div class="nav-dot"></div>
+    </button>
+    <button onclick="App.showPage('review')" class="nav-item flex flex-col items-center gap-0.5" data-nav="review">
+      <span class="text-xl">📚</span><span class="text-[10px] font-semibold">ทบทวน</span><div class="nav-dot"></div>
+    </button>
+    <button onclick="App.showPage('profile')" class="nav-item flex flex-col items-center gap-0.5" data-nav="profile">
+      <span class="text-xl">👤</span><span class="text-[10px] font-semibold">โปรไฟล์</span><div class="nav-dot"></div>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== MODALS ===== -->
+<div id="modalOverlay" class="fixed inset-0 bg-black/40 z-[60] hidden" onclick="Modal.hide()"></div>
+<div id="modalContent" class="fixed bottom-0 left-0 right-0 z-[61] hidden max-h-[85vh] overflow-y-auto rounded-t-3xl" style="transition:transform .3s ease">
+  <div class="glass rounded-t-3xl p-5 max-w-[480px] mx-auto">
+    <div class="w-10 h-1 bg-gray-300 rounded-full mx-auto mb-4"></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// DATA — CHINESE VOCABULARY (10 Units, HSK 1)
+// Format: [character, pinyin, thai_meaning, english_meaning]
+// ============================================================================
+const VOCAB_CN = {
+  1: { name:'ตัวเลข', nameEn:'Numbers', icon:'🔢', words:[
+    ['一','yī','หนึ่ง','one'],['二','èr','สอง','two'],['三','sān','สาม','three'],
+    ['四','sì','สี่','four'],['五','wǔ','ห้า','five'],['六','liù','หก','six'],
+    ['七','qī','เจ็ด','seven'],['八','bā','แปด','eight'],['九','jiǔ','เก้า','nine'],['十','shí','สิบ','ten']
+  ]},
+  2: { name:'ครอบครัว', nameEn:'Family', icon:'👨‍👩‍👧‍👦', words:[
+    ['爸爸','bàba','พ่อ','father'],['妈妈','māma','แม่','mother'],['哥哥','gēge','พี่ชาย','older brother'],
+    ['姐姐','jiějie','พี่สาว','older sister'],['弟弟','dìdi','น้องชาย','younger brother'],['妹妹','mèimei','น้องสาว','younger sister'],
+    ['儿子','érzi','ลูกชาย','son'],['女儿','nǚér','ลูกสาว','daughter']
+  ]},
+  3: { name:'สี', nameEn:'Colors', icon:'🎨', words:[
+    ['红色','hóngsè','สีแดง','red'],['蓝色','lánsè','สีน้ำเงิน','blue'],['绿色','lǜsè','สีเขียว','green'],
+    ['黄色','huángsè','สีเหลือง','yellow'],['白色','báisè','สีขาว','white'],['黑色','hēisè','สีดำ','black'],
+    ['粉色','fěnsè','สีชมพู','pink'],['紫色','zǐsè','สีม่วง','purple']
+  ]},
+  4: { name:'อาหาร', nameEn:'Food', icon:'🍜', words:[
+    ['米饭','mǐfàn','ข้าว','rice'],['面条','miàntiáo','ก๋วยเตี๋ยว','noodles'],['水','shuǐ','น้ำ','water'],
+    ['茶','chá','ชา','tea'],['苹果','píngguǒ','แอปเปิล','apple'],['鸡蛋','jīdàn','ไข่','egg'],
+    ['鱼','yú','ปลา','fish'],['牛奶','niúnǎi','นม','milk']
+  ]},
+  5: { name:'ร่างกาย', nameEn:'Body', icon:'🧍', words:[
+    ['头','tóu','หัว','head'],['手','shǒu','มือ','hand'],['脚','jiǎo','เท้า','foot'],
+    ['眼睛','yǎnjing','ตา','eye'],['嘴巴','zuǐba','ปาก','mouth'],['耳朵','ěrduo','หู','ear'],
+    ['鼻子','bízi','จมูก','nose'],['头发','tóufa','ผม','hair']
+  ]},
+  6: { name:'สัตว์', nameEn:'Animals', icon:'🐾', words:[
+    ['猫','māo','แมว','cat'],['狗','gǒu','สุนัข','dog'],['鸟','niǎo','นก','bird'],
+    ['鱼','yú','ปลา','fish'],['马','mǎ','ม้า','horse'],['牛','niú','วัว','cow'],
+    ['猪','zhū','หมู','pig'],['兔子','tùzi','กระต่าย','rabbit']
+  ]},
+  7: { name:'เวลา', nameEn:'Time', icon:'⏰', words:[
+    ['今天','jīntiān','วันนี้','today'],['明天','míngtiān','พรุ่งนี้','tomorrow'],['昨天','zuótiān','เมื่อวาน','yesterday'],
+    ['早上','zǎoshang','เช้า','morning'],['晚上','wǎnshang','เย็น/คืน','evening'],['现在','xiànzài','ตอนนี้','now'],
+    ['星期','xīngqī','สัปดาห์','week'],['小时','xiǎoshí','ชั่วโมง','hour']
+  ]},
+  8: { name:'สถานที่', nameEn:'Places', icon:'🏫', words:[
+    ['学校','xuéxiào','โรงเรียน','school'],['医院','yīyuàn','โรงพยาบาล','hospital'],['商店','shāngdiàn','ร้านค้า','shop'],
+    ['家','jiā','บ้าน','home'],['公司','gōngsī','บริษัท','company'],['饭店','fàndiàn','ร้านอาหาร','restaurant'],
+    ['银行','yínháng','ธนาคาร','bank'],['机场','jīchǎng','สนามบิน','airport']
+  ]},
+  9: { name:'การกระทำ', nameEn:'Actions', icon:'🏃', words:[
+    ['吃','chī','กิน','eat'],['喝','hē','ดื่ม','drink'],['看','kàn','ดู','look/watch'],
+    ['听','tīng','ฟัง','listen'],['说','shuō','พูด','speak'],['写','xiě','เขียน','write'],
+    ['读','dú','อ่าน','read'],['走','zǒu','เดิน','walk']
+  ]},
+  10:{ name:'ทักทาย', nameEn:'Greetings', icon:'👋', words:[
+    ['你好','nǐ hǎo','สวัสดี','hello'],['谢谢','xièxie','ขอบคุณ','thank you'],['对不起','duìbuqǐ','ขอโทษ','sorry'],
+    ['再见','zàijiàn','ลาก่อน','goodbye'],['请','qǐng','กรุณา','please'],['没关系','méi guānxi','ไม่เป็นไร','no problem'],
+    ['好的','hǎo de','ได้เลย','okay'],['不客气','bú kèqi','ไม่เป็นไร','you are welcome']
+  ]}
+};
+
+// ============================================================================
+// DATA — ENGLISH VOCABULARY (10 Units, CEFR A1)
+// Format: [word, ipa, thai_meaning, chinese_equivalent]
+// ============================================================================
+const VOCAB_EN = {
+  1: { name:'Greetings', nameTh:'ทักทาย', icon:'👋', words:[
+    ['hello','/həˈloʊ/','สวัสดี','你好'],['goodbye','/ɡʊdˈbaɪ/','ลาก่อน','再见'],['please','/pliːz/','กรุณา','请'],
+    ['thank you','/θæŋk juː/','ขอบคุณ','谢谢'],['sorry','/ˈsɑːri/','ขอโทษ','对不起'],['yes','/jes/','ใช่','是'],
+    ['no','/noʊ/','ไม่','不'],['excuse me','/ɪkˈskjuːz miː/','ขอโทษ(เรียก)','打扰一下']
+  ]},
+  2: { name:'Numbers', nameTh:'ตัวเลข', icon:'🔢', words:[
+    ['one','/wʌn/','หนึ่ง','一'],['two','/tuː/','สอง','二'],['three','/θriː/','สาม','三'],
+    ['four','/fɔːr/','สี่','四'],['five','/faɪv/','ห้า','五'],['six','/sɪks/','หก','六'],
+    ['seven','/ˈsev.ən/','เจ็ด','七'],['eight','/eɪt/','แปด','八'],['nine','/naɪn/','เก้า','九'],['ten','/ten/','สิบ','十']
+  ]},
+  3: { name:'Colors', nameTh:'สี', icon:'🎨', words:[
+    ['red','/red/','สีแดง','红色'],['blue','/bluː/','สีน้ำเงิน','蓝色'],['green','/ɡriːn/','สีเขียว','绿色'],
+    ['yellow','/ˈjel.oʊ/','สีเหลือง','黄色'],['white','/waɪt/','สีขาว','白色'],['black','/blæk/','สีดำ','黑色'],
+    ['orange','/ˈɔːr.ɪndʒ/','สีส้ม','橙色'],['pink','/pɪŋk/','สีชมพู','粉色']
+  ]},
+  4: { name:'Family', nameTh:'ครอบครัว', icon:'👨‍👩‍👧‍👦', words:[
+    ['father','/ˈfɑː.ðər/','พ่อ','爸爸'],['mother','/ˈmʌð.ər/','แม่','妈妈'],['brother','/ˈbrʌð.ər/','พี่/น้องชาย','兄弟'],
+    ['sister','/ˈsɪs.tər/','พี่/น้องสาว','姐妹'],['son','/sʌn/','ลูกชาย','儿子'],['daughter','/ˈdɔː.tər/','ลูกสาว','女儿'],
+    ['husband','/ˈhʌz.bənd/','สามี','丈夫'],['wife','/waɪf/','ภรรยา','妻子']
+  ]},
+  5: { name:'Food & Drinks', nameTh:'อาหาร', icon:'🍽️', words:[
+    ['rice','/raɪs/','ข้าว','米饭'],['water','/ˈwɔː.tər/','น้ำ','水'],['coffee','/ˈkɔː.fi/','กาแฟ','咖啡'],
+    ['bread','/bred/','ขนมปัง','面包'],['egg','/eɡ/','ไข่','鸡蛋'],['chicken','/ˈtʃɪk.ɪn/','ไก่','鸡肉'],
+    ['milk','/mɪlk/','นม','牛奶'],['fruit','/fruːt/','ผลไม้','水果']
+  ]},
+  6: { name:'Body Parts', nameTh:'ร่างกาย', icon:'🧍', words:[
+    ['head','/hed/','หัว','头'],['hand','/hænd/','มือ','手'],['foot','/fʊt/','เท้า','脚'],
+    ['eye','/aɪ/','ตา','眼睛'],['mouth','/maʊθ/','ปาก','嘴巴'],['ear','/ɪr/','หู','耳朵'],
+    ['nose','/noʊz/','จมูก','鼻子'],['hair','/her/','ผม','头发']
+  ]},
+  7: { name:'Animals', nameTh:'สัตว์', icon:'🐾', words:[
+    ['cat','/kæt/','แมว','猫'],['dog','/dɔːɡ/','สุนัข','狗'],['bird','/bɜːrd/','นก','鸟'],
+    ['fish','/fɪʃ/','ปลา','鱼'],['horse','/hɔːrs/','ม้า','马'],['cow','/kaʊ/','วัว','牛'],
+    ['pig','/pɪɡ/','หมู','猪'],['rabbit','/ˈræb.ɪt/','กระต่าย','兔子']
+  ]},
+  8: { name:'Daily Actions', nameTh:'การกระทำ', icon:'🏃', words:[
+    ['eat','/iːt/','กิน','吃'],['drink','/drɪŋk/','ดื่ม','喝'],['read','/riːd/','อ่าน','读'],
+    ['write','/raɪt/','เขียน','写'],['sleep','/sliːp/','นอน','睡觉'],['walk','/wɔːk/','เดิน','走'],
+    ['run','/rʌn/','วิ่ง','跑'],['talk','/tɔːk/','พูด','说话']
+  ]},
+  9: { name:'Places', nameTh:'สถานที่', icon:'🏫', words:[
+    ['school','/skuːl/','โรงเรียน','学校'],['hospital','/ˈhɑː.spɪ.təl/','โรงพยาบาล','医院'],
+    ['restaurant','/ˈres.tər.ɑːnt/','ร้านอาหาร','饭店'],['home','/hoʊm/','บ้าน','家'],
+    ['office','/ˈɑː.fɪs/','ที่ทำงาน','办公室'],['park','/pɑːrk/','สวนสาธารณะ','公园'],
+    ['airport','/ˈer.pɔːrt/','สนามบิน','机场'],['bank','/bæŋk/','ธนาคาร','银行']
+  ]},
+  10:{ name:'Time', nameTh:'เวลา', icon:'⏰', words:[
+    ['today','/təˈdeɪ/','วันนี้','今天'],['tomorrow','/təˈmɑː.roʊ/','พรุ่งนี้','明天'],
+    ['yesterday','/ˈjes.tər.deɪ/','เมื่อวาน','昨天'],['morning','/ˈmɔːr.nɪŋ/','เช้า','早上'],
+    ['evening','/ˈiːv.nɪŋ/','เย็น','晚上'],['now','/naʊ/','ตอนนี้','现在'],
+    ['week','/wiːk/','สัปดาห์','星期'],['hour','/aʊr/','ชั่วโมง','小时']
+  ]}
+};
+
+// Sentence data for scramble game
+const SENTENCES_CN = [
+  {words:['我','喜欢','吃','苹果'], answer:'我喜欢吃苹果', meaning:'ฉันชอบกินแอปเปิล'},
+  {words:['他','是','我的','哥哥'], answer:'他是我的哥哥', meaning:'เขาเป็นพี่ชายของฉัน'},
+  {words:['今天','天气','很','好'], answer:'今天天气很好', meaning:'วันนี้อากาศดี'},
+  {words:['你','叫','什么','名字'], answer:'你叫什么名字', meaning:'คุณชื่ออะไร'},
+  {words:['我','想','喝','茶'], answer:'我想喝茶', meaning:'ฉันอยากดื่มชา'},
+  {words:['她','去','学校','了'], answer:'她去学校了', meaning:'เธอไปโรงเรียนแล้ว'},
+  {words:['这个','多少','钱'], answer:'这个多少钱', meaning:'อันนี้เท่าไหร่'},
+  {words:['我们','一起','走','吧'], answer:'我们一起走吧', meaning:'เราไปด้วยกันเถอะ'},
+];
+const SENTENCES_EN = [
+  {words:['I','like','to','eat','apples'], answer:'I like to eat apples', meaning:'ฉันชอบกินแอปเปิล'},
+  {words:['He','is','my','brother'], answer:'He is my brother', meaning:'เขาเป็นพี่ชายของฉัน'},
+  {words:['The','weather','is','nice','today'], answer:'The weather is nice today', meaning:'วันนี้อากาศดี'},
+  {words:['What','is','your','name'], answer:'What is your name', meaning:'คุณชื่ออะไร'},
+  {words:['I','want','to','drink','tea'], answer:'I want to drink tea', meaning:'ฉันอยากดื่มชา'},
+  {words:['She','goes','to','school'], answer:'She goes to school', meaning:'เธอไปโรงเรียน'},
+  {words:['How','much','does','this','cost'], answer:'How much does this cost', meaning:'อันนี้ราคาเท่าไหร่'},
+  {words:['Let','us','go','together'], answer:'Let us go together', meaning:'เราไปด้วยกันเถอะ'},
+];
+
+// Tone data for balloon game
+const TONE_DATA = [
+  {char:'妈',pinyin:'mā',tone:1},{char:'麻',pinyin:'má',tone:2},{char:'马',pinyin:'mǎ',tone:3},{char:'骂',pinyin:'mà',tone:4},
+  {char:'他',pinyin:'tā',tone:1},{char:'拿',pinyin:'ná',tone:2},{char:'你',pinyin:'nǐ',tone:3},{char:'大',pinyin:'dà',tone:4},
+  {char:'书',pinyin:'shū',tone:1},{char:'人',pinyin:'rén',tone:2},{char:'水',pinyin:'shuǐ',tone:3},{char:'是',pinyin:'shì',tone:4},
+  {char:'吃',pinyin:'chī',tone:1},{char:'来',pinyin:'lái',tone:2},{char:'买',pinyin:'mǎi',tone:3},{char:'去',pinyin:'qù',tone:4},
+  {char:'天',pinyin:'tiān',tone:1},{char:'学',pinyin:'xué',tone:2},{char:'好',pinyin:'hǎo',tone:3},{char:'看',pinyin:'kàn',tone:4},
+];
+
+// Badge definitions
+const BADGES = [
+  {id:'streak',name:'🔥 Streak Warrior',tiers:[3,7,30],desc:['3 วัน','7 วัน','30 วัน'],check:s=>s.streak},
+  {id:'vocab',name:'📚 Vocab Collector',tiers:[20,50,200],desc:['20 คำ','50 คำ','200 คำ'],check:s=>s.wordsLearned},
+  {id:'ears',name:'👂 Sharp Ears',tiers:[10,30,100],desc:['10 ข้อ','30 ข้อ','100 ข้อ'],check:s=>s.listeningCorrect},
+  {id:'quiz',name:'🎯 Quiz Master',tiers:[5,15,50],desc:['5 ครั้ง','15 ครั้ง','50 ครั้ง'],check:s=>s.perfectQuizzes},
+  {id:'speed',name:'⚡ Speed Demon',tiers:[1,5,20],desc:['1 ครั้ง','5 ครั้ง','20 ครั้ง'],check:s=>s.speedWins},
+  {id:'night',name:'🌙 Night Owl',tiers:[1,10,30],desc:['1 ครั้ง','10 ครั้ง','30 ครั้ง'],check:s=>s.nightSessions},
+];
+
+// Bot names for leaderboard
+const BOT_NAMES = [
+  {name:'Arin',flag:'🇹🇭'},{name:'Mika',flag:'🇯🇵'},{name:'Luna',flag:'🇰🇷'},{name:'Leo',flag:'🇺🇸'},
+  {name:'Suki',flag:'🇹🇭'},{name:'Hana',flag:'🇯🇵'},{name:'Max',flag:'🇩🇪'},{name:'Bella',flag:'🇮🇹'},
+  {name:'Kai',flag:'🇹🇭'},{name:'Yuki',flag:'🇯🇵'},{name:'Noah',flag:'🇬🇧'},{name:'Mei',flag:'🇨🇳'},
+  {name:'Zara',flag:'🇫🇷'},{name:'Rio',flag:'🇧🇷'}
+];
+
+// ============================================================================
+// SOUND FX ENGINE — Web Audio API (Zero audio files)
+// ============================================================================
+const SoundFX = {
+  ctx: null,
+  init() { if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)(); },
+  _play(freq, type, dur, ramp) {
+    this.init();
+    const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.15,this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01,this.ctx.currentTime+dur);
+    o.connect(g); g.connect(this.ctx.destination);
+    o.start(); o.stop(this.ctx.currentTime+dur);
+    return {o,g};
+  },
+  playCorrect() {
+    this.init(); const t=this.ctx.currentTime;
+    [[523.25,0],[659.25,0.08],[783.99,0.16]].forEach(([f,d])=>{
+      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0.15,t+d);g.gain.exponentialRampToValueAtTime(0.01,t+d+0.2);
+      o.connect(g);g.connect(this.ctx.destination);o.start(t+d);o.stop(t+d+0.2);
+    });
+  },
+  playWrong() {
+    this.init();const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type='sawtooth';o.frequency.value=150;
+    g.gain.setValueAtTime(0.12,this.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.01,this.ctx.currentTime+0.3);
+    o.connect(g);g.connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+0.3);
+  },
+  playLevelUp() {
+    this.init();const t=this.ctx.currentTime;
+    [261.63,329.63,392,523.25,659.25].forEach((f,i)=>{
+      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type='sine';o.frequency.value=f;
+      g.gain.setValueAtTime(0.12,t+i*0.1);g.gain.exponentialRampToValueAtTime(0.01,t+i*0.1+0.3);
+      o.connect(g);g.connect(this.ctx.destination);o.start(t+i*0.1);o.stop(t+i*0.1+0.3);
+    });
+  },
+  playCoin() { this._play(1200,'sine',0.15); },
+  playClick() { this._play(800,'sine',0.05); },
+  playPop() { this._play(600,'sine',0.1); },
+  playTick() { this._play(1000,'square',0.03); }
+};
+
+// ============================================================================
+// SPEECH ENGINE — Web Speech API
+// ============================================================================
+const Speech = {
+  speak(text, lang='zh-CN', rate=0.85) {
+    if(!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang=lang; u.rate=rate;
+    speechSynthesis.speak(u);
+  },
+  speakCN(text) { this.speak(text,'zh-CN',0.8); },
+  speakEN(text) { this.speak(text,'en-US',0.85); },
+  hasSTT: !!(window.SpeechRecognition||window.webkitSpeechRecognition),
+  listen(lang, onResult) {
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR) return;
+    const r=new SR(); r.lang=lang; r.interimResults=false; r.maxAlternatives=1;
+    r.onresult=e=>{ onResult(e.results[0][0].transcript.trim()); };
+    r.onerror=()=>{ onResult(null); };
+    r.start();
+    return r;
+  }
+};
+
+// ============================================================================
+// GAME STATE — XP, Streak, Coins, Badges, Quests, Leaderboard
+// ============================================================================
+const GS = {
+  _d: null,
+  _default() {
+    return {
+      username:'', avatar:'🧑‍🎓', goal:'both', profileSetup:false,
+      xp:0, coins:0, streak:0, longestStreak:0,
+      lastActiveDate:null, streakFreezes:0,
+      wordsLearned:0, listeningCorrect:0, perfectQuizzes:0, speedWins:0, nightSessions:0,
+      completedUnits:{cn:{},en:{}}, unitStars:{cn:{},en:{}},
+      quests:null, questDate:null,
+      bots:null, botWeek:null,
+      activityDays:{}, // 'YYYY-MM-DD': count
+      skills:{vocab:0,listening:0,speaking:0,grammar:0,reading:0,writing:0},
+      shopPurchases:[]
+    };
+  },
+  load() {
+    try { this._d = JSON.parse(localStorage.getItem('lq_state'))||this._default(); }
+    catch(e) { this._d = this._default(); }
+    this._checkStreak();
+    this._ensureQuests();
+    this._ensureBots();
+    return this._d;
+  },
+  save() { localStorage.setItem('lq_state', JSON.stringify(this._d)); this.updateUI(); },
+  get d() { if(!this._d) this.load(); return this._d; },
+
+  _today() { return new Date().toISOString().slice(0,10); },
+  _checkStreak() {
+    const today=this._today(), d=this._d;
+    if(!d.lastActiveDate) return;
+    const last=new Date(d.lastActiveDate), now=new Date(today);
+    const diff=Math.floor((now-last)/(86400000));
+    if(diff>1) {
+      if(d.streakFreezes>0) { d.streakFreezes--; }
+      else { d.streak=0; }
+    }
+  },
+  recordActivity() {
+    const today=this._today(), d=this.d;
+    if(d.lastActiveDate!==today) {
+      const last=d.lastActiveDate?new Date(d.lastActiveDate):null;
+      const now=new Date(today);
+      if(last && Math.floor((now-last)/86400000)===1) { d.streak++; }
+      else if(!last||Math.floor((now-last)/86400000)>1) { if(d.streakFreezes>0&&last) {d.streak++;d.streakFreezes--;} else d.streak=1; }
+      d.lastActiveDate=today;
+      d.longestStreak=Math.max(d.longestStreak,d.streak);
+      // Night owl check
+      const h=new Date().getHours();
+      if(h>=22||h<6) d.nightSessions=(d.nightSessions||0)+1;
+    }
+    d.activityDays[today]=(d.activityDays[today]||0)+1;
+    this.save();
+  },
+  addXP(n) {
+    const oldLv=this.getLevel();
+    this.d.xp+=n;
+    const newLv=this.getLevel();
+    if(newLv>oldLv) { SoundFX.playLevelUp(); App.toast(`🎉 Level Up! Level ${newLv}`); try{confetti({particleCount:100,spread:70})}catch(e){} }
+    this.save();
+  },
+  addCoins(n) { this.d.coins+=n; SoundFX.playCoin(); this.save(); },
+  getLevel() { return Math.floor(0.1*Math.sqrt(this.d.xp))+1; },
+  getLevelProgress() {
+    const lv=this.getLevel();
+    const xpForCur=Math.pow((lv-1)/0.1,2);
+    const xpForNext=Math.pow(lv/0.1,2);
+    return Math.min(100,((this.d.xp-xpForCur)/(xpForNext-xpForCur))*100);
+  },
+
+  // Quests
+  _ensureQuests() {
+    const today=this._today();
+    if(this._d.questDate!==today) {
+      this._d.quests=[
+        {id:'learn',desc:'🥉 เรียน 1 บท',target:1,progress:0,xp:10,coins:10,done:false},
+        {id:'quiz',desc:'🥈 ได้ 90%+ ใน Quiz',target:1,progress:0,xp:20,coins:15,done:false},
+        {id:'review',desc:'🥇 ทบทวน 10 คำ หรือเล่น Mini-game',target:1,progress:0,xp:30,coins:25,done:false}
+      ];
+      this._d.questDate=today;
+    }
+  },
+  completeQuest(id) {
+    const q=this.d.quests.find(q=>q.id===id);
+    if(q&&!q.done) { q.progress=q.target; q.done=true; this.addXP(q.xp); this.addCoins(q.coins); App.toast(`✅ ภารกิจสำเร็จ! +${q.xp}XP +${q.coins}🪙`); }
+    if(this.d.quests.every(q=>q.done)) { this.addCoins(50); App.toast('🎁 Daily Master Chest! +50🪙'); }
+    this.save();
+  },
+
+  // Bots
+  _ensureBots() {
+    const week=Math.floor(Date.now()/(7*86400000));
+    if(this._d.botWeek!==week||!this._d.bots) {
+      this._d.bots=BOT_NAMES.map(b=>({...b,xp:Math.floor(Math.random()*200)+50}));
+      this._d.botWeek=week;
+    }
+    // Simulate bot activity
+    this._d.bots.forEach(b=>{ b.xp+=Math.floor(Math.random()*30)+5; });
+  },
+
+  // Badges
+  getBadgeTier(badge) {
+    const val=badge.check(this.d);
+    if(val>=badge.tiers[2]) return 3;
+    if(val>=badge.tiers[1]) return 2;
+    if(val>=badge.tiers[0]) return 1;
+    return 0;
+  },
+
+  updateUI() {
+    const d=this.d;
+    const el=(id)=>document.getElementById(id);
+    el('coinCount').textContent=d.coins;
+    el('streakCount').textContent=d.streak;
+    el('levelNum').textContent=this.getLevel();
+    el('xpBar').style.width=this.getLevelProgress()+'%';
+  }
+};
+
+// ============================================================================
+// SRS ENGINE — Leitner 5-Box
+// ============================================================================
+const SRS = {
+  _key: 'lq_srs',
+  _data: null,
+  load() {
+    try { this._data=JSON.parse(localStorage.getItem(this._key))||{}; }
+    catch(e) { this._data={}; }
+  },
+  save() { localStorage.setItem(this._key,JSON.stringify(this._data)); },
+  get data() { if(!this._data) this.load(); return this._data; },
+
+  addWord(wordId, lang) {
+    if(!this.data[wordId]) {
+      this.data[wordId]={box:1,last:Date.now(),next:Date.now(),correct:0,wrong:0,lang};
+      this.save();
+    }
+  },
+  intervals: {1:1,2:3,3:7,4:14,5:30},
+  reviewCard(wordId, correct) {
+    const c=this.data[wordId]; if(!c) return;
+    if(correct) { c.box=Math.min(5,c.box+1); c.correct++; }
+    else { c.box=1; c.wrong++; }
+    c.last=Date.now();
+    c.next=Date.now()+(this.intervals[c.box]*86400000);
+    this.save();
+  },
+  getDueCards() {
+    const now=Date.now();
+    return Object.entries(this.data).filter(([id,c])=>c.next<=now).map(([id,c])=>({id,...c}));
+  },
+  getBoxStats() {
+    const stats={1:0,2:0,3:0,4:0,5:0};
+    Object.values(this.data).forEach(c=>{ stats[c.box]=(stats[c.box]||0)+1; });
+    return stats;
+  },
+  getWordInfo(wordId) {
+    const [lang,unit,idx]=wordId.split('_');
+    const vocab=lang==='cn'?VOCAB_CN:VOCAB_EN;
+    const w=vocab[parseInt(unit)]?.words[parseInt(idx)];
+    return w?{lang,word:w}:null;
+  },
+  _reviewQueue:[], _reviewIdx:0,
+  startReview() {
+    const due=this.getDueCards();
+    if(due.length===0) { App.toast('🎉 ไม่มีคำที่ต้องทบทวนตอนนี้!'); return; }
+    this._reviewQueue=due.sort(()=>Math.random()-0.5).slice(0,20);
+    this._reviewIdx=0;
+    this._showReviewCard();
+  },
+  _showReviewCard() {
+    const area=document.getElementById('reviewArea');
+    area.classList.remove('hidden');
+    if(this._reviewIdx>=this._reviewQueue.length) {
+      area.innerHTML=`<div class="glass rounded-2xl p-6 text-center card-shadow animate-bounce-in">
+        <div class="text-5xl mb-3">🎉</div>
+        <h3 class="font-bold text-lg text-gray-800 mb-2">ทบทวนครบแล้ว!</h3>
+        <p class="text-sm text-gray-500 mb-4">ทบทวนแล้ว ${this._reviewQueue.length} คำ</p>
+        <button onclick="SRS._reviewIdx=0;document.getElementById('reviewArea').classList.add('hidden');SRS.updateReviewUI()" class="px-6 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press">ตกลง</button>
+      </div>`;
+      GS.d.quests.find(q=>q.id==='review')&&GS.completeQuest('review');
+      return;
+    }
+    const card=this._reviewQueue[this._reviewIdx];
+    const info=this.getWordInfo(card.id);
+    if(!info) { this._reviewIdx++; this._showReviewCard(); return; }
+    const w=info.word;
+    const isCN=info.lang==='cn';
+    const display=isCN?w[0]:w[0];
+    const sub=isCN?w[1]:w[1];
+    const answer=w[2];
+
+    // Generate options
+    const vocab=isCN?VOCAB_CN:VOCAB_EN;
+    const allWords=Object.values(vocab).flatMap(u=>u.words);
+    let opts=[answer];
+    while(opts.length<4) {
+      const r=allWords[Math.floor(Math.random()*allWords.length)][2];
+      if(!opts.includes(r)) opts.push(r);
+    }
+    opts.sort(()=>Math.random()-0.5);
+
+    area.innerHTML=`<div class="glass rounded-2xl p-5 card-shadow animate-slide-up mb-4">
+      <div class="text-center mb-4">
+        <div class="text-xs text-gray-400 mb-1">Box ${card.box}/5 • ${this._reviewIdx+1}/${this._reviewQueue.length}</div>
+        <div class="text-4xl font-bold ${isCN?'text-red-600':'text-blue-600'} mb-1">${display}</div>
+        <div class="text-sm text-gray-500">${sub}</div>
+        <button onclick="Speech.${isCN?'speakCN':'speakEN'}('${display}')" class="mt-2 px-3 py-1 bg-gray-100 rounded-lg text-sm btn-press">🔊 ฟัง</button>
+      </div>
+      <div class="space-y-2">
+        ${opts.map(o=>`<button onclick="SRS._answerReview('${card.id}','${o.replace(/'/g,"\\'")}','${answer.replace(/'/g,"\\'")}')" class="quiz-opt w-full text-left p-3 rounded-xl border-2 border-gray-200 bg-white font-semibold text-gray-700 btn-press">${o}</button>`).join('')}
+      </div>
+    </div>`;
+  },
+  _answerReview(wordId, chosen, correct) {
+    const isCorrect=chosen===correct;
+    this.reviewCard(wordId, isCorrect);
+    if(isCorrect) { SoundFX.playCorrect(); GS.addXP(3); }
+    else { SoundFX.playWrong(); }
+    // Highlight
+    document.querySelectorAll('.quiz-opt').forEach(btn=>{
+      btn.disabled=true;
+      if(btn.textContent===correct) btn.classList.add('correct');
+      if(btn.textContent===chosen&&!isCorrect) btn.classList.add('wrong');
+    });
+    setTimeout(()=>{ this._reviewIdx++; this._showReviewCard(); }, 800);
+  },
+  updateReviewUI() {
+    const due=this.getDueCards();
+    document.getElementById('reviewDueCount').textContent=due.length;
+    document.getElementById('btnStartReview').disabled=due.length===0;
+    const stats=this.getBoxStats();
+    const total=Object.values(stats).reduce((a,b)=>a+b,0)||1;
+    const colors=['bg-red-400','bg-orange-400','bg-yellow-400','bg-green-400','bg-emerald-500'];
+    document.getElementById('boxStats').innerHTML=Object.entries(stats).map(([box,count],i)=>
+      `<div><div class="text-lg font-bold">${count}</div><div class="text-[10px] text-gray-500">Box ${box}</div></div>`
+    ).join('');
+    document.getElementById('boxBars').innerHTML=Object.entries(stats).map(([box,count],i)=>
+      `<div class="flex items-center gap-2"><span class="text-xs w-10">Box ${box}</span><div class="flex-1 h-4 bg-gray-100 rounded-full overflow-hidden"><div class="${colors[i]} h-full rounded-full" style="width:${(count/total)*100}%"></div></div><span class="text-xs text-gray-500 w-8">${count}</span></div>`
+    ).join('');
+  }
+};
+
+// ============================================================================
+// LESSON CONTROLLER
+// ============================================================================
+const Lesson = {
+  lang: null, unit: null, words: [], step: 0, wordIdx: 0,
+  steps: ['intro','listen','write','sentence','voice','quiz'],
+  quizScore: 0, quizTotal: 0,
+
+  start(lang, unitNum) {
+    this.lang=lang; this.unit=unitNum;
+    const vocab=lang==='cn'?VOCAB_CN:VOCAB_EN;
+    this.words=[...vocab[unitNum].words];
+    this.step=0; this.wordIdx=0; this.quizScore=0; this.quizTotal=0;
+    GS.recordActivity();
+    App.showPage('lesson');
+    this.render();
+  },
+  exit() {
+    App.showPage('units');
+    App.showUnits(this.lang);
+  },
+  render() {
+    const total=this.steps.length;
+    document.getElementById('lessonBar').style.width=((this.step+1)/total*100)+'%';
+    document.getElementById('lessonStep').textContent=`${this.step+1}/${total}`;
+    const content=document.getElementById('lessonContent');
+    switch(this.steps[this.step]) {
+      case 'intro': this._renderIntro(content); break;
+      case 'listen': this._renderListen(content); break;
+      case 'write': this._renderWrite(content); break;
+      case 'sentence': this._renderSentence(content); break;
+      case 'voice': this._renderVoice(content); break;
+      case 'quiz': this._renderQuiz(content); break;
+    }
+  },
+  nextStep() {
+    if(this.step<this.steps.length-1) { this.step++; this.wordIdx=0; this.render(); }
+  },
+  _nextWord() {
+    if(this.wordIdx<this.words.length-1) {
+      this.wordIdx++;
+      this.render();
+    } else {
+      this.nextStep();
+    }
+  },
+
+  _renderIntro(el) {
+    const w=this.words[this.wordIdx];
+    const isCN=this.lang==='cn';
+    const main=w[0], sub=w[1], thai=w[2], extra=w[3];
+    // Add to SRS
+    const wordId=`${this.lang}_${this.unit}_${this.wordIdx}`;
+    SRS.addWord(wordId, this.lang);
+    GS.d.wordsLearned = Object.keys(SRS.data).length;
+
+    el.innerHTML=`
+    <div class="text-center animate-bounce-in">
+      <div class="text-xs text-gray-400 mb-2">📖 เรียนรู้คำศัพท์ ${this.wordIdx+1}/${this.words.length}</div>
+      <div class="glass rounded-3xl p-8 card-shadow mb-4">
+        <div class="text-6xl font-bold ${isCN?'text-red-500':'text-blue-600'} mb-3" style="font-family:'Noto Sans TC',sans-serif">${main}</div>
+        <div class="text-lg text-gray-500 mb-1">${sub}</div>
+        <div class="text-xl font-bold text-gray-800 mb-1">${thai}</div>
+        <div class="text-sm text-gray-400">${isCN?'English: '+extra:'中文: '+extra}</div>
+        <button onclick="Speech.${isCN?'speakCN':'speakEN'}('${main.replace(/'/g,"\\'")}');SoundFX.playClick()" class="mt-4 px-5 py-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-full font-bold btn-press text-sm">🔊 ฟังเสียง</button>
+      </div>
+      <div class="flex gap-3 justify-center">
+        ${this.wordIdx>0?'<button onclick="Lesson.wordIdx--;Lesson.render()" class="px-5 py-2 bg-gray-200 rounded-xl font-bold btn-press">← ก่อนหน้า</button>':''}
+        <button onclick="Lesson._nextWord()" class="px-5 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press">${this.wordIdx<this.words.length-1?'ถัดไป →':'เริ่มฝึกฟัง →'}</button>
+      </div>
+    </div>`;
+  },
+
+  _renderListen(el) {
+    const isCN=this.lang==='cn';
+    const words=[...this.words].sort(()=>Math.random()-0.5).slice(0,5);
+    const target=words[0];
+    let opts=[target[2]];
+    while(opts.length<4) {
+      const r=this.words[Math.floor(Math.random()*this.words.length)][2];
+      if(!opts.includes(r)) opts.push(r);
+    }
+    opts.sort(()=>Math.random()-0.5);
+
+    el.innerHTML=`
+    <div class="text-center animate-slide-up">
+      <div class="text-xs text-gray-400 mb-2">👂 ฟังแล้วเลือกคำที่ถูกต้อง</div>
+      <div class="glass rounded-3xl p-6 card-shadow mb-4">
+        <div class="text-5xl mb-4 animate-float">👂</div>
+        <button onclick="Speech.${isCN?'speakCN':'speakEN'}('${target[0].replace(/'/g,"\\'")}');SoundFX.playClick()" class="px-6 py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-full font-bold btn-press mb-2">🔊 ฟังเสียง</button>
+        <button onclick="Speech.${isCN?'speakCN':'speakEN'}('${target[0].replace(/'/g,"\\'")}', 0.6)" class="px-4 py-2 bg-gray-100 rounded-full text-sm btn-press">🐢 ฟังช้าๆ</button>
+      </div>
+      <div class="space-y-2" id="listenOpts">
+        ${opts.map(o=>`<button onclick="Lesson._checkListen(this,'${o.replace(/'/g,"\\'")}','${target[2].replace(/'/g,"\\'")}')" class="quiz-opt w-full text-left p-3 rounded-xl border-2 border-gray-200 bg-white font-semibold text-gray-700 btn-press">${o}</button>`).join('')}
+      </div>
+    </div>`;
+    // Auto play
+    setTimeout(()=>Speech[isCN?'speakCN':'speakEN'](target[0]),500);
+  },
+  _listenRound: 0,
+  _checkListen(btn, chosen, correct) {
+    const isCorrect=chosen===correct;
+    document.querySelectorAll('#listenOpts .quiz-opt').forEach(b=>{
+      b.disabled=true;
+      if(b.textContent===correct) b.classList.add('correct');
+      if(b.textContent===chosen&&!isCorrect) b.classList.add('wrong');
+    });
+    if(isCorrect) { SoundFX.playCorrect(); GS.addXP(2); GS.d.listeningCorrect=(GS.d.listeningCorrect||0)+1; GS.save(); }
+    else { SoundFX.playWrong(); }
+    this._listenRound=(this._listenRound||0)+1;
+    setTimeout(()=>{
+      if(this._listenRound<3) this._renderListen(document.getElementById('lessonContent'));
+      else { this._listenRound=0; this.nextStep(); }
+    },1000);
+  },
+
+  _renderWrite(el) {
+    const isCN=this.lang==='cn';
+    if(!isCN) { this.nextStep(); return; } // Skip for English
+    const w=this.words[Math.min(this.wordIdx, this.words.length-1)];
+    const char=w[0].charAt(0);
+    el.innerHTML=`
+    <div class="text-center animate-slide-up">
+      <div class="text-xs text-gray-400 mb-2">✍️ ฝึกเขียนอักษรจีน</div>
+      <div class="glass rounded-3xl p-6 card-shadow mb-4">
+        <div class="text-lg font-bold text-gray-700 mb-2">${w[0]} <span class="text-sm text-gray-400">(${w[1]})</span> — ${w[2]}</div>
+        <div class="flex gap-4 justify-center items-start mb-4 flex-wrap">
+          <div>
+            <p class="text-xs text-gray-400 mb-1">ดูแอนิเมชัน</p>
+            <div id="hanziDemo" class="bg-white rounded-2xl border-2 border-gray-200 inline-block" style="width:140px;height:140px"></div>
+            <br><button onclick="Lesson._animateHanzi()" class="mt-2 text-sm px-3 py-1 bg-gray-100 rounded-lg btn-press">▶️ เล่นซ้ำ</button>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-1">ฝึกเขียน</p>
+            <div id="hanziQuiz" class="bg-white rounded-2xl border-2 border-primary-200 inline-block" style="width:140px;height:140px"></div>
+            <br><button onclick="Lesson._resetHanziQuiz()" class="mt-2 text-sm px-3 py-1 bg-gray-100 rounded-lg btn-press">🔄 เริ่มใหม่</button>
+          </div>
+        </div>
+      </div>
+      <button onclick="Lesson.nextStep()" class="px-6 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press">ถัดไป →</button>
+    </div>`;
+    // Init Hanzi Writer
+    try {
+      this._hanziDemo=HanziWriter.create('hanziDemo',char,{width:140,height:140,padding:5,showOutline:true,strokeColor:'#ef4444',radicalColor:'#22c55e',delayBetweenStrokes:300});
+      this._hanziQuiz=HanziWriter.create('hanziQuiz',char,{width:140,height:140,padding:5,showOutline:true,showCharacter:false,strokeColor:'#7c3aed'});
+      setTimeout(()=>{
+        this._hanziDemo.animateCharacter();
+        this._hanziQuiz.quiz({onCorrectStroke:()=>SoundFX.playClick(),onComplete:()=>{SoundFX.playCorrect();GS.addXP(3);GS.d.skills.writing+=1;GS.save();}});
+      },300);
+    } catch(e) { console.log('HanziWriter error:',e); }
+  },
+  _animateHanzi() { try{this._hanziDemo.animateCharacter();}catch(e){} },
+  _resetHanziQuiz() { try{this._hanziQuiz.quiz({onCorrectStroke:()=>SoundFX.playClick(),onComplete:()=>{SoundFX.playCorrect();}});}catch(e){} },
+
+  _renderSentence(el) {
+    const isCN=this.lang==='cn';
+    const sentences=isCN?SENTENCES_CN:SENTENCES_EN;
+    const s=sentences[Math.floor(Math.random()*sentences.length)];
+    const shuffled=[...s.words].sort(()=>Math.random()-0.5);
+    el.innerHTML=`
+    <div class="text-center animate-slide-up">
+      <div class="text-xs text-gray-400 mb-2">🧩 เรียงคำให้เป็นประโยค</div>
+      <div class="glass rounded-3xl p-6 card-shadow mb-4">
+        <div class="text-sm text-gray-500 mb-3">💡 ${s.meaning}</div>
+        <div id="sentenceDropZone" class="drop-zone min-h-[52px] mb-4 justify-center text-lg font-bold"></div>
+        <div id="sentenceChips" class="flex flex-wrap justify-center gap-2">
+          ${shuffled.map((w,i)=>`<span class="chip bg-primary-100 text-primary-700 border-2 border-primary-300" onclick="Lesson._addChip(this,'${w.replace(/'/g,"\\'")}')" data-word="${w}">${w}</span>`).join('')}
+        </div>
+        <div id="sentenceResult" class="mt-3 text-sm font-bold hidden"></div>
+      </div>
+      <div class="flex gap-2 justify-center">
+        <button onclick="Lesson._clearSentence()" class="px-4 py-2 bg-gray-200 rounded-xl font-bold btn-press text-sm">🔄 ล้าง</button>
+        <button onclick="Lesson._checkSentence('${s.answer.replace(/'/g,"\\'")}')" class="px-6 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press text-sm">✅ ตรวจ</button>
+        <button onclick="Lesson.nextStep()" class="px-4 py-2 bg-gray-200 rounded-xl font-bold btn-press text-sm">ข้าม →</button>
+      </div>
+    </div>`;
+    this._sentenceWords=[];
+  },
+  _sentenceWords:[],
+  _addChip(chip, word) {
+    chip.classList.add('placed');
+    this._sentenceWords.push(word);
+    const zone=document.getElementById('sentenceDropZone');
+    const el=document.createElement('span');
+    el.className='chip bg-primary-500 text-white text-sm';
+    el.textContent=word;
+    el.onclick=()=>{ el.remove(); this._sentenceWords=this._sentenceWords.filter(w=>w!==word); chip.classList.remove('placed'); };
+    zone.appendChild(el);
+    SoundFX.playClick();
+  },
+  _clearSentence() {
+    this._sentenceWords=[];
+    document.getElementById('sentenceDropZone').innerHTML='';
+    document.querySelectorAll('#sentenceChips .chip').forEach(c=>c.classList.remove('placed'));
+  },
+  _checkSentence(correct) {
+    const attempt=this._sentenceWords.join(this.lang==='cn'?'':' ');
+    const res=document.getElementById('sentenceResult');
+    res.classList.remove('hidden');
+    if(attempt===correct) {
+      res.innerHTML='<span class="text-green-600">✅ ถูกต้อง! เก่งมาก!</span>';
+      SoundFX.playCorrect(); GS.addXP(5); GS.d.skills.grammar+=1; GS.save();
+    } else {
+      res.innerHTML=`<span class="text-red-500">❌ ลองอีกครั้ง</span><br><span class="text-gray-400 text-xs">คำตอบ: ${correct}</span>`;
+      SoundFX.playWrong();
+    }
+  },
+
+  _renderVoice(el) {
+    if(!Speech.hasSTT) { this.nextStep(); return; }
+    const w=this.words[Math.floor(Math.random()*this.words.length)];
+    const isCN=this.lang==='cn';
+    el.innerHTML=`
+    <div class="text-center animate-slide-up">
+      <div class="text-xs text-gray-400 mb-2">🗣️ ฝึกพูด</div>
+      <div class="glass rounded-3xl p-6 card-shadow mb-4">
+        <div class="text-4xl font-bold ${isCN?'text-red-500':'text-blue-600'} mb-2">${w[0]}</div>
+        <div class="text-sm text-gray-500 mb-1">${w[1]}</div>
+        <div class="text-gray-700 font-bold mb-4">${w[2]}</div>
+        <button onclick="Speech.${isCN?'speakCN':'speakEN'}('${w[0].replace(/'/g,"\\'")}')" class="px-4 py-2 bg-gray-100 rounded-xl btn-press mb-3 text-sm">🔊 ฟังตัวอย่าง</button>
+        <br>
+        <button id="micBtn" onclick="Lesson._startVoice('${w[0].replace(/'/g,"\\'")}','${isCN?'zh-CN':'en-US'}')" class="px-8 py-4 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-full font-bold btn-press text-lg animate-pulse-custom">🎤 กดแล้วพูด</button>
+        <div id="voiceResult" class="mt-3 text-sm font-bold"></div>
+      </div>
+      <button onclick="Lesson.nextStep()" class="px-6 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press">ถัดไป →</button>
+    </div>`;
+  },
+  _startVoice(target, lang) {
+    const btn=document.getElementById('micBtn');
+    btn.textContent='🎤 กำลังฟัง...';
+    btn.classList.add('animate-pulse-custom');
+    Speech.listen(lang, (result)=>{
+      btn.textContent='🎤 กดแล้วพูด';
+      btn.classList.remove('animate-pulse-custom');
+      const res=document.getElementById('voiceResult');
+      if(result) {
+        const sim=Lesson._similarity(result.toLowerCase(),target.toLowerCase());
+        if(sim>=0.8) { res.innerHTML=`<span class="text-green-600">✅ เก่งมาก! "${result}" (${Math.round(sim*100)}%)</span>`; SoundFX.playCorrect(); GS.addXP(5); GS.d.skills.speaking+=1; GS.save(); }
+        else if(sim>=0.5) { res.innerHTML=`<span class="text-yellow-600">🤔 ใกล้แล้ว! คุณพูด: "${result}" (${Math.round(sim*100)}%)</span>`; }
+        else { res.innerHTML=`<span class="text-red-500">❌ ลองอีกครั้ง คุณพูด: "${result}"</span>`; SoundFX.playWrong(); }
+      } else { res.innerHTML='<span class="text-gray-400">ไม่ได้ยิน ลองอีกครั้ง</span>'; }
+    });
+  },
+  _similarity(a,b) {
+    if(a===b) return 1;
+    const m=a.length, n=b.length;
+    const dp=Array.from({length:m+1},()=>Array(n+1).fill(0));
+    for(let i=0;i<=m;i++) dp[i][0]=i;
+    for(let j=0;j<=n;j++) dp[0][j]=j;
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++)
+      dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+    return 1-dp[m][n]/Math.max(m,n);
+  },
+
+  _quizWords:[], _quizIdx:0,
+  _renderQuiz(el) {
+    this._quizWords=[...this.words].sort(()=>Math.random()-0.5).slice(0,5);
+    this._quizIdx=0; this.quizScore=0; this.quizTotal=this._quizWords.length;
+    this._showQuizQ(el);
+  },
+  _showQuizQ(el) {
+    if(!el) el=document.getElementById('lessonContent');
+    if(this._quizIdx>=this._quizWords.length) {
+      this._finishLesson(el); return;
+    }
+    const w=this._quizWords[this._quizIdx];
+    const isCN=this.lang==='cn';
+    let opts=[w[2]];
+    while(opts.length<4) {
+      const r=this.words[Math.floor(Math.random()*this.words.length)][2];
+      if(!opts.includes(r)) opts.push(r);
+    }
+    opts.sort(()=>Math.random()-0.5);
+
+    el.innerHTML=`
+    <div class="text-center animate-slide-up">
+      <div class="text-xs text-gray-400 mb-2">🎯 Quiz ${this._quizIdx+1}/${this._quizWords.length}</div>
+      <div class="glass rounded-3xl p-6 card-shadow mb-4">
+        <div class="text-3xl font-bold ${isCN?'text-red-500':'text-blue-600'} mb-2">${w[0]}</div>
+        <div class="text-sm text-gray-500 mb-4">${w[1]}</div>
+        <div class="space-y-2" id="quizOpts">
+          ${opts.map(o=>`<button onclick="Lesson._answerQuiz(this,'${o.replace(/'/g,"\\'")}','${w[2].replace(/'/g,"\\'")}')" class="quiz-opt w-full text-left p-3 rounded-xl border-2 border-gray-200 bg-white font-semibold text-gray-700 btn-press">${o}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  },
+  _answerQuiz(btn, chosen, correct) {
+    const isCorrect=chosen===correct;
+    if(isCorrect) { this.quizScore++; SoundFX.playCorrect(); GS.addXP(3); }
+    else { SoundFX.playWrong(); }
+    document.querySelectorAll('#quizOpts .quiz-opt').forEach(b=>{
+      b.disabled=true;
+      if(b.textContent===correct) b.classList.add('correct');
+      if(b.textContent===chosen&&!isCorrect) b.classList.add('wrong');
+    });
+    this._quizIdx++;
+    setTimeout(()=>this._showQuizQ(),800);
+  },
+  _finishLesson(el) {
+    if(!el) el=document.getElementById('lessonContent');
+    const pct=Math.round(this.quizScore/this.quizTotal*100);
+    const stars=pct>=100?3:pct>=80?2:1;
+    const starStr='⭐'.repeat(stars)+'☆'.repeat(3-stars);
+    const xpBonus=pct>=100?15:pct>=80?10:5;
+    const coinBonus=this.quizScore*10;
+    GS.addXP(xpBonus); GS.addCoins(coinBonus);
+    GS.d.completedUnits[this.lang][this.unit]=true;
+    GS.d.unitStars[this.lang][this.unit]=Math.max(stars, GS.d.unitStars[this.lang][this.unit]||0);
+    GS.d.skills.vocab+=this.words.length;
+    GS.d.skills.reading+=2;
+    if(pct===100) GS.d.perfectQuizzes=(GS.d.perfectQuizzes||0)+1;
+    GS.completeQuest('learn');
+    if(pct>=90) GS.completeQuest('quiz');
+    GS.save();
+    try{confetti({particleCount:80,spread:60});}catch(e){}
+
+    el.innerHTML=`
+    <div class="text-center animate-bounce-in">
+      <div class="glass rounded-3xl p-8 card-shadow">
+        <div class="text-5xl mb-2">🎉</div>
+        <h2 class="text-xl font-bold text-gray-800 mb-2">บทเรียนเสร็จสิ้น!</h2>
+        <div class="text-4xl mb-3">${starStr}</div>
+        <div class="text-lg font-bold text-primary-600 mb-1">${pct}% ถูกต้อง</div>
+        <div class="text-sm text-gray-500 mb-4">ได้ ${xpBonus} XP + ${coinBonus} 🪙</div>
+        <div class="flex gap-3 justify-center">
+          <button onclick="Lesson.start('${this.lang}',${this.unit})" class="px-5 py-2 bg-gray-200 rounded-xl font-bold btn-press">🔄 เรียนอีกครั้ง</button>
+          <button onclick="Lesson.exit()" class="px-5 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press">✅ กลับ</button>
+        </div>
+      </div>
+    </div>`;
+  }
+};
+
+// ============================================================================
+// MINI-GAMES
+// ============================================================================
+const Games = {
+  currentLang: 'cn',
+  _timer: null, _interval: null,
+  setLang(lang) {
+    this.currentLang=lang;
+    document.getElementById('gameLangCn').className=`flex-1 py-2 rounded-xl font-bold text-sm btn-press ${lang==='cn'?'bg-red-100 text-red-700 border-2 border-red-300':'bg-gray-100 text-gray-500 border-2 border-gray-200'}`;
+    document.getElementById('gameLangEn').className=`flex-1 py-2 rounded-xl font-bold text-sm btn-press ${lang==='en'?'bg-blue-100 text-blue-700 border-2 border-blue-300':'bg-gray-100 text-gray-500 border-2 border-gray-200'}`;
+  },
+  start(game) {
+    App.showPage('gameplay');
+    clearInterval(this._interval);
+    GS.recordActivity();
+    switch(game) {
+      case 'speedmatch': this._speedMatch(); break;
+      case 'balloon': this._balloon(); break;
+      case 'wordrain': this._wordRain(); break;
+      case 'scramble': this._scramble(); break;
+    }
+  },
+  exit() {
+    clearInterval(this._interval);
+    App.showPage('games');
+  },
+  _getVocabPool() {
+    const vocab=this.currentLang==='cn'?VOCAB_CN:VOCAB_EN;
+    return Object.values(vocab).flatMap(u=>u.words);
+  },
+
+  // ---- SPEED MATCH ----
+  _speedMatch() {
+    document.getElementById('gameTitle').textContent='⚡ Speed Match';
+    const pool=this._getVocabPool();
+    const words=pool.sort(()=>Math.random()-0.5).slice(0,6);
+    const cards=[];
+    words.forEach((w,i)=>{
+      cards.push({id:i,type:'word',text:w[0],matchId:i});
+      cards.push({id:i,type:'meaning',text:w[2],matchId:i});
+    });
+    cards.sort(()=>Math.random()-0.5);
+    let selected=null, matched=0, score=0, combo=0;
+    let timeLeft=45;
+    document.getElementById('gameTimer').textContent=`⏱ ${timeLeft}s`;
+    document.getElementById('gameScore').textContent=`🪙 ${score}`;
+    this._interval=setInterval(()=>{
+      timeLeft--;
+      document.getElementById('gameTimer').textContent=`⏱ ${timeLeft}s`;
+      if(timeLeft<=0) { clearInterval(this._interval); this._gameOver('Speed Match',score); }
+    },1000);
+
+    const area=document.getElementById('gameArea');
+    area.innerHTML=`<div class="grid grid-cols-3 gap-2" id="matchGrid">
+      ${cards.map((c,i)=>`<div class="match-card glass rounded-xl p-3 text-center card-shadow" data-idx="${i}" data-mid="${c.matchId}" data-type="${c.type}" onclick="Games._matchClick(this)">
+        <span class="text-sm font-bold">${c.text}</span>
+      </div>`).join('')}
+    </div>`;
+  },
+  _matchSelected: null,
+  _matchClick(el) {
+    if(el.classList.contains('matched')) return;
+    const mid=el.dataset.mid, type=el.dataset.type;
+    if(this._matchSelected) {
+      if(this._matchSelected===el) { el.style.borderColor=''; this._matchSelected=null; return; }
+      if(this._matchSelected.dataset.mid===mid&&this._matchSelected.dataset.type!==type) {
+        // Match!
+        el.classList.add('matched'); this._matchSelected.classList.add('matched');
+        SoundFX.playCorrect();
+        const score=parseInt(document.getElementById('gameScore').textContent.split(' ')[1])+10;
+        document.getElementById('gameScore').textContent=`🪙 ${score}`;
+        this._matchSelected=null;
+        // Check all matched
+        if(document.querySelectorAll('.match-card:not(.matched)').length===0) {
+          clearInterval(this._interval);
+          const time=parseInt(document.getElementById('gameTimer').textContent.split(' ')[1]);
+          GS.d.speedWins=(GS.d.speedWins||0)+1; GS.save();
+          this._gameOver('Speed Match',score+time*2);
+        }
+      } else {
+        // No match
+        SoundFX.playWrong();
+        el.classList.add('animate-shake'); this._matchSelected.classList.add('animate-shake');
+        const prev=this._matchSelected;
+        setTimeout(()=>{ el.classList.remove('animate-shake'); prev.classList.remove('animate-shake'); },400);
+        el.style.borderColor=''; this._matchSelected.style.borderColor='';
+        this._matchSelected=null;
+      }
+    } else {
+      this._matchSelected=el;
+      el.style.borderColor='#8b5cf6';
+      el.style.borderWidth='3px';
+    }
+  },
+
+  // ---- TONE BALLOON POP ----
+  _balloon() {
+    document.getElementById('gameTitle').textContent='🎈 Tone Balloon Pop';
+    const area=document.getElementById('gameArea');
+    let round=0, score=0, total=10;
+    document.getElementById('gameScore').textContent=`🪙 ${score}`;
+    document.getElementById('gameTimer').textContent=`${round+1}/${total}`;
+
+    const showRound=()=>{
+      if(round>=total) { this._gameOver('Tone Balloon Pop',score); return; }
+      const item=TONE_DATA[Math.floor(Math.random()*TONE_DATA.length)];
+      const toneLabels=['','ˉ (1st)','ˊ (2nd)','ˇ (3rd)','ˋ (4th)'];
+      const colors=['','bg-red-400','bg-yellow-400','bg-green-400','bg-blue-400'];
+      area.innerHTML=`
+      <div class="text-center mb-4">
+        <button onclick="Speech.speakCN('${item.char}')" class="text-3xl bg-white rounded-2xl px-8 py-4 card-shadow btn-press">🔊 ฟังเสียง</button>
+        <p class="text-xs text-gray-400 mt-2">(${item.char} — ${item.pinyin})</p>
+      </div>
+      <div class="grid grid-cols-2 gap-4 mt-6">
+        ${[1,2,3,4].map(t=>`
+          <button onclick="Games._balloonPop(${t},${item.tone},${round})" class="balloon-btn ${colors[t]} text-white rounded-3xl p-6 text-center btn-press card-shadow hover:scale-105 transition-transform">
+            <div class="text-4xl mb-1">🎈</div>
+            <div class="font-bold text-lg">${toneLabels[t]}</div>
+          </button>
+        `).join('')}
+      </div>`;
+      setTimeout(()=>Speech.speakCN(item.char),400);
+    };
+    this._balloonRound=round; this._balloonScore=score; this._balloonTotal=total; this._balloonShowRound=showRound;
+    showRound();
+  },
+  _balloonPop(chosen, correct, round) {
+    if(chosen===correct) {
+      SoundFX.playPop(); this._balloonScore+=10;
+      App.toast('🎈 ถูกต้อง! +10');
+    } else {
+      SoundFX.playWrong();
+      App.toast(`❌ คำตอบคือ Tone ${correct}`);
+    }
+    this._balloonRound++;
+    document.getElementById('gameScore').textContent=`🪙 ${this._balloonScore}`;
+    document.getElementById('gameTimer').textContent=`${this._balloonRound+1}/${this._balloonTotal}`;
+    setTimeout(()=>this._balloonShowRound(),600);
+  },
+
+  // ---- WORD RAIN ----
+  _wordRain() {
+    document.getElementById('gameTitle').textContent='🌧️ Word Rain';
+    const area=document.getElementById('gameArea');
+    const pool=this._getVocabPool().sort(()=>Math.random()-0.5);
+    let idx=0, score=0, lives=3, speed=2000;
+    document.getElementById('gameScore').textContent=`🪙 ${score}`;
+    document.getElementById('gameTimer').textContent=`❤️ ${'♥'.repeat(lives)}`;
+
+    const showWord=()=>{
+      if(lives<=0||idx>=pool.length) {
+        clearTimeout(this._timer);
+        this._gameOver('Word Rain',score);
+        return;
+      }
+      const w=pool[idx];
+      let opts=[w[2]];
+      while(opts.length<3) {
+        const r=pool[Math.floor(Math.random()*pool.length)][2];
+        if(!opts.includes(r)) opts.push(r);
+      }
+      opts.sort(()=>Math.random()-0.5);
+      area.innerHTML=`
+      <div class="relative" style="height:300px;overflow:hidden">
+        <div id="fallingWord" class="absolute text-3xl font-bold text-center w-full animate-slide-up" style="top:-10px;animation:fallDown ${speed/1000}s linear forwards">
+          ${w[0]}
+          <div class="text-sm text-gray-400">${w[1]}</div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0 h-2 bg-red-300 rounded-full"></div>
+      </div>
+      <div class="grid grid-cols-3 gap-2 mt-4">
+        ${opts.map(o=>`<button onclick="Games._rainAnswer('${o.replace(/'/g,"\\'")}','${w[2].replace(/'/g,"\\'")}')" class="py-4 rounded-xl font-bold btn-press glass card-shadow text-sm">${o}</button>`).join('')}
+      </div>`;
+      // Add falling animation
+      const style=document.createElement('style');
+      style.textContent=`@keyframes fallDown{from{top:-10px}to{top:280px}}`;
+      document.head.appendChild(style);
+      this._timer=setTimeout(()=>{
+        lives--;
+        document.getElementById('gameTimer').textContent=`❤️ ${'♥'.repeat(Math.max(0,lives))}`;
+        SoundFX.playWrong();
+        idx++;
+        showWord();
+      },speed);
+      idx++;
+      if(idx%5===0&&speed>800) speed-=200;
+    };
+    this._rainLives=lives; this._rainScore=score; this._rainShow=showWord; this._rainIdx=idx;
+    showWord();
+  },
+  _rainAnswer(chosen, correct) {
+    clearTimeout(this._timer);
+    if(chosen===correct) {
+      this._rainScore+=10;
+      SoundFX.playCorrect();
+      document.getElementById('gameScore').textContent=`🪙 ${this._rainScore}`;
+    } else {
+      this._rainLives--;
+      document.getElementById('gameTimer').textContent=`❤️ ${'♥'.repeat(Math.max(0,this._rainLives))}`;
+      SoundFX.playWrong();
+    }
+    if(this._rainLives<=0) { this._gameOver('Word Rain',this._rainScore); return; }
+    setTimeout(()=>this._rainShow(),300);
+  },
+
+  // ---- SENTENCE SCRAMBLE ----
+  _scramble() {
+    document.getElementById('gameTitle').textContent='🧩 Sentence Scramble';
+    const sentences=this.currentLang==='cn'?[...SENTENCES_CN]:[...SENTENCES_EN];
+    const queue=sentences.sort(()=>Math.random()-0.5).slice(0,5);
+    let idx=0, score=0, timeLeft=60;
+    document.getElementById('gameScore').textContent=`🪙 ${score}`;
+    document.getElementById('gameTimer').textContent=`⏱ ${timeLeft}s`;
+    this._interval=setInterval(()=>{
+      timeLeft--;
+      document.getElementById('gameTimer').textContent=`⏱ ${timeLeft}s`;
+      if(timeLeft<=0) { clearInterval(this._interval); this._gameOver('Sentence Scramble',score); }
+    },1000);
+
+    this._scrQueue=queue; this._scrIdx=0; this._scrScore=0; this._scrWords=[];
+    this._scrShowQ();
+  },
+  _scrShowQ() {
+    if(this._scrIdx>=this._scrQueue.length) { clearInterval(this._interval); this._gameOver('Sentence Scramble',this._scrScore); return; }
+    const s=this._scrQueue[this._scrIdx];
+    const shuffled=[...s.words].sort(()=>Math.random()-0.5);
+    this._scrWords=[];
+    const area=document.getElementById('gameArea');
+    area.innerHTML=`
+    <div class="text-center animate-slide-up">
+      <div class="text-sm text-gray-500 mb-3">${this._scrIdx+1}/${this._scrQueue.length}: ${s.meaning}</div>
+      <div id="scrDropZone" class="drop-zone min-h-[52px] mb-4 justify-center text-lg font-bold mx-4"></div>
+      <div id="scrChips" class="flex flex-wrap justify-center gap-2 mb-4">
+        ${shuffled.map(w=>`<span class="chip bg-amber-100 text-amber-800 border-2 border-amber-300" onclick="Games._scrAddChip(this,'${w.replace(/'/g,"\\'")}')" data-word="${w}">${w}</span>`).join('')}
+      </div>
+      <div class="flex gap-2 justify-center">
+        <button onclick="Games._scrClear()" class="px-4 py-2 bg-gray-200 rounded-xl font-bold btn-press text-sm">🔄 ล้าง</button>
+        <button onclick="Games._scrCheck('${s.answer.replace(/'/g,"\\'")}')" class="px-5 py-2 bg-amber-500 text-white rounded-xl font-bold btn-press text-sm">✅ ตรวจ</button>
+      </div>
+    </div>`;
+  },
+  _scrAddChip(chip,word) {
+    chip.classList.add('placed'); this._scrWords.push(word);
+    const zone=document.getElementById('scrDropZone');
+    const el=document.createElement('span');
+    el.className='chip bg-amber-500 text-white text-sm';
+    el.textContent=word;
+    el.onclick=()=>{ el.remove(); this._scrWords=this._scrWords.filter(w=>w!==word); chip.classList.remove('placed'); };
+    zone.appendChild(el); SoundFX.playClick();
+  },
+  _scrClear() {
+    this._scrWords=[];
+    document.getElementById('scrDropZone').innerHTML='';
+    document.querySelectorAll('#scrChips .chip').forEach(c=>c.classList.remove('placed'));
+  },
+  _scrCheck(correct) {
+    const attempt=this._scrWords.join(this.currentLang==='cn'?'':' ');
+    if(attempt===correct) {
+      SoundFX.playCorrect(); this._scrScore+=20;
+      document.getElementById('gameScore').textContent=`🪙 ${this._scrScore}`;
+      App.toast('✅ ถูกต้อง! +20');
+      this._scrIdx++;
+      setTimeout(()=>this._scrShowQ(),500);
+    } else {
+      SoundFX.playWrong();
+      App.toast('❌ ลองอีกครั้ง');
+    }
+  },
+
+  // ---- GAME OVER ----
+  _gameOver(name, score) {
+    clearInterval(this._interval); clearTimeout(this._timer);
+    GS.addXP(Math.floor(score/2)); GS.addCoins(score);
+    GS.completeQuest('review');
+    try{confetti({particleCount:60,spread:50});}catch(e){}
+    const area=document.getElementById('gameArea');
+    area.innerHTML=`
+    <div class="text-center animate-bounce-in">
+      <div class="glass rounded-3xl p-8 card-shadow">
+        <div class="text-5xl mb-2">🏆</div>
+        <h2 class="text-xl font-bold text-gray-800 mb-1">${name}</h2>
+        <div class="text-3xl font-bold text-primary-600 mb-2">คะแนน: ${score}</div>
+        <div class="text-sm text-gray-500 mb-4">ได้ +${Math.floor(score/2)} XP, +${score} 🪙</div>
+        <div class="flex gap-3 justify-center">
+          <button onclick="Games.start('${name==='Speed Match'?'speedmatch':name==='Tone Balloon Pop'?'balloon':name==='Word Rain'?'wordrain':'scramble'}')" class="px-5 py-2 bg-primary-500 text-white rounded-xl font-bold btn-press">🔄 เล่นอีก</button>
+          <button onclick="Games.exit()" class="px-5 py-2 bg-gray-200 rounded-xl font-bold btn-press">🏠 กลับ</button>
+        </div>
+      </div>
+    </div>`;
+  }
+};
+
+// ============================================================================
+// MODAL, SHOP, LEADERBOARD
+// ============================================================================
+const Modal = {
+  show(html) {
+    document.getElementById('modalBody').innerHTML=html;
+    document.getElementById('modalOverlay').classList.remove('hidden');
+    document.getElementById('modalContent').classList.remove('hidden');
+  },
+  hide() {
+    document.getElementById('modalOverlay').classList.add('hidden');
+    document.getElementById('modalContent').classList.add('hidden');
+  }
+};
+
+const Shop = {
+  show() {
+    const d=GS.d;
+    const items=[
+      {id:'freeze',name:'❄️ Streak Freeze',desc:'ป้องกัน Streak หลุด 1 วัน',price:50},
+      {id:'theme_ocean',name:'🌊 ธีมมหาสมุทร',desc:'เปลี่ยนสีพื้นหลัง',price:200},
+      {id:'theme_forest',name:'🌲 ธีมป่าไม้',desc:'เปลี่ยนสีพื้นหลัง',price:200},
+      {id:'bonus_xp',name:'⭐ 2x XP (1 ชม.)',desc:'ได้ XP สองเท่า 1 ชั่วโมง',price:100},
+    ];
+    Modal.show(`
+      <h2 class="text-lg font-bold text-gray-800 mb-1">🏪 ร้านค้า</h2>
+      <p class="text-sm text-gray-500 mb-3">เหรียญของคุณ: 🪙 <span class="font-bold text-yellow-600">${d.coins}</span></p>
+      <div class="space-y-2">
+        ${items.map(it=>`
+          <div class="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100">
+            <div class="text-2xl">${it.name.split(' ')[0]}</div>
+            <div class="flex-1"><div class="font-bold text-sm text-gray-800">${it.name}</div><div class="text-xs text-gray-500">${it.desc}</div></div>
+            <button onclick="Shop.buy('${it.id}',${it.price})" class="px-3 py-1 bg-yellow-400 text-yellow-900 rounded-lg font-bold text-sm btn-press ${d.coins<it.price?'opacity-50':''}">🪙 ${it.price}</button>
+          </div>
+        `).join('')}
+      </div>
+    `);
+  },
+  buy(id, price) {
+    if(GS.d.coins<price) { App.toast('❌ เหรียญไม่พอ!'); return; }
+    GS.d.coins-=price;
+    if(id==='freeze') GS.d.streakFreezes=(GS.d.streakFreezes||0)+1;
+    GS.d.shopPurchases.push({id,date:Date.now()});
+    GS.save();
+    SoundFX.playCoin();
+    App.toast(`✅ ซื้อสำเร็จ!`);
+    Modal.hide();
+  }
+};
+
+const Leaderboard = {
+  show() {
+    const d=GS.d;
+    const players=[...d.bots,{name:d.username||'คุณ',flag:d.avatar||'⭐',xp:d.xp,isUser:true}];
+    players.sort((a,b)=>b.xp-a.xp);
+    const medals=['🥇','🥈','🥉'];
+    Modal.show(`
+      <h2 class="text-lg font-bold text-gray-800 mb-3">🏆 ลีดเดอร์บอร์ด</h2>
+      <div class="space-y-1">
+        ${players.slice(0,15).map((p,i)=>`
+          <div class="flex items-center gap-3 p-2 rounded-xl ${p.isUser?'bg-primary-50 border-2 border-primary-300':''}">
+            <span class="w-6 text-center font-bold text-sm ${i<3?'text-lg':''}">${i<3?medals[i]:i+1}</span>
+            <span>${p.flag}</span>
+            <span class="flex-1 font-semibold text-sm ${p.isUser?'text-primary-700':''}">${p.name}</span>
+            <span class="text-sm font-bold text-gray-600">${p.xp} XP</span>
+          </div>
+        `).join('')}
+      </div>
+    `);
+  }
+};
+
+// ============================================================================
+// PROFILE
+// ============================================================================
+const Profile = {
+  _compFilter: 'all',
+  render() {
+    const d=GS.d;
+    // Profile identity
+    document.getElementById('profName').textContent=d.username||'นักสำรวจภาษา';
+    document.getElementById('profAvatarBig').textContent=d.avatar||'🧑‍🎓';
+    document.getElementById('profLevel').textContent=GS.getLevel();
+    document.getElementById('profXP').textContent=d.xp;
+    document.getElementById('profStreak').textContent=d.streak;
+    document.getElementById('profWords').textContent=Object.keys(SRS.data).length;
+    document.getElementById('profCoins').textContent=d.coins;
+    this.drawRadar();
+    this.drawHeatmap();
+    this.renderBadges();
+    this.renderCompendium();
+  },
+  drawRadar() {
+    const canvas=document.getElementById('radarChart');
+    if(!canvas) return;
+    const ctx=canvas.getContext('2d');
+    const w=300,h=300,cx=w/2,cy=h/2,r=100;
+    ctx.clearRect(0,0,w,h);
+    const labels=['📚 Vocab','👂 Listening','🗣️ Speaking','📝 Grammar','📖 Reading','✍️ Writing'];
+    const skills=GS.d.skills;
+    const maxVal=Math.max(50,...Object.values(skills));
+    const vals=[skills.vocab,skills.listening,skills.speaking,skills.grammar,skills.reading,skills.writing].map(v=>v/maxVal);
+    const n=6, step=Math.PI*2/n;
+
+    // Grid
+    [0.25,0.5,0.75,1].forEach(s=>{
+      ctx.beginPath();
+      for(let i=0;i<n;i++) {
+        const a=-Math.PI/2+i*step;
+        const x=cx+Math.cos(a)*r*s, y=cy+Math.sin(a)*r*s;
+        i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.stroke();
+    });
+    // Axes
+    for(let i=0;i<n;i++) {
+      const a=-Math.PI/2+i*step;
+      ctx.beginPath(); ctx.moveTo(cx,cy);
+      ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+      ctx.strokeStyle='rgba(0,0,0,0.1)'; ctx.stroke();
+      // Label
+      const lx=cx+Math.cos(a)*(r+25), ly=cy+Math.sin(a)*(r+20);
+      ctx.fillStyle='#6b7280'; ctx.font='11px Inter,sans-serif'; ctx.textAlign='center';
+      ctx.fillText(labels[i],lx,ly);
+    }
+    // Data
+    ctx.beginPath();
+    for(let i=0;i<n;i++) {
+      const a=-Math.PI/2+i*step;
+      const x=cx+Math.cos(a)*r*Math.max(0.05,vals[i]), y=cy+Math.sin(a)*r*Math.max(0.05,vals[i]);
+      i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(139,92,246,0.2)'; ctx.fill();
+    ctx.strokeStyle='#8b5cf6'; ctx.lineWidth=2; ctx.stroke();
+    // Dots
+    for(let i=0;i<n;i++) {
+      const a=-Math.PI/2+i*step;
+      const x=cx+Math.cos(a)*r*Math.max(0.05,vals[i]), y=cy+Math.sin(a)*r*Math.max(0.05,vals[i]);
+      ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2);
+      ctx.fillStyle='#7c3aed'; ctx.fill();
+    }
+  },
+  drawHeatmap() {
+    const el=document.getElementById('heatmap');
+    const days=30;
+    const today=new Date();
+    let html='';
+    for(let i=days-1;i>=0;i--) {
+      const d=new Date(today); d.setDate(d.getDate()-i);
+      const key=d.toISOString().slice(0,10);
+      const count=GS.d.activityDays[key]||0;
+      const color=count===0?'bg-gray-100':count<3?'bg-primary-200':count<6?'bg-primary-400':'bg-primary-600';
+      html+=`<div class="heatmap-cell ${color}" title="${key}: ${count} activities"></div>`;
+    }
+    el.innerHTML=html;
+  },
+  renderBadges() {
+    const grid=document.getElementById('badgeGrid');
+    const tierColors=['bg-gray-100 text-gray-400','bg-amber-100 text-amber-700','bg-gray-200 text-gray-600','bg-yellow-100 text-yellow-700'];
+    const tierNames=['🔒','🥉','🥈','🥇'];
+    grid.innerHTML=BADGES.map(b=>{
+      const tier=GS.getBadgeTier(b);
+      return `<div class="text-center p-2 rounded-xl ${tierColors[tier]}">
+        <div class="text-2xl">${b.name.split(' ')[0]}</div>
+        <div class="text-[10px] font-bold mt-1">${b.name.split(' ').slice(1).join(' ')}</div>
+        <div class="text-[10px]">${tier>0?tierNames[tier]+' '+b.desc[tier-1]:tierNames[0]}</div>
+      </div>`;
+    }).join('');
+  },
+  filterCompendium(f) { this._compFilter=f; this.renderCompendium(); },
+  renderCompendium() {
+    const list=document.getElementById('compendiumList');
+    const allSRS=Object.entries(SRS.data);
+    if(allSRS.length===0) { list.innerHTML='<p class="text-sm text-gray-400 text-center py-4">ยังไม่มีคำศัพท์ เริ่มเรียนเลย!</p>'; return; }
+    const filtered=allSRS.filter(([id,c])=>this._compFilter==='all'||c.lang===this._compFilter);
+    list.innerHTML=filtered.slice(0,50).map(([id,c])=>{
+      const info=SRS.getWordInfo(id);
+      if(!info) return '';
+      const w=info.word;
+      const isCN=info.lang==='cn';
+      const stars='⭐'.repeat(Math.min(c.box,5));
+      return `<div class="flex items-center gap-2 p-2 rounded-lg hover:bg-white/50 cursor-pointer" onclick="Speech.${isCN?'speakCN':'speakEN'}('${w[0].replace(/'/g,"\\'")}')">
+        <span class="text-lg font-bold ${isCN?'text-red-500':'text-blue-600'} w-16 text-center">${w[0]}</span>
+        <span class="text-xs text-gray-400 w-16">${w[1]}</span>
+        <span class="flex-1 text-sm text-gray-700">${w[2]}</span>
+        <span class="text-[10px]">${stars}</span>
+        <span class="text-xs">🔊</span>
+      </div>`;
+    }).join('');
+  }
+};
+
+// ============================================================================
+// ONBOARDING — First-time profile setup
+// ============================================================================
+const AVATARS = ['🧑‍🎓','👦','👧','🧒','👨','👩','🧑','👴','👵','🧒🏻','👦🏻','👧🏻','🧑🏽','👨🏻','👩🏻','🐼','🦊','🐱','🐶','🦁','🐸','🐯','🐰','🦄','🐲'];
+
+const Onboarding = {
+  _avatar: '🧑‍🎓',
+  _goal: 'both',
+  show() {
+    document.getElementById('onboarding').classList.remove('hidden');
+    document.getElementById('header').style.display='none';
+    document.querySelector('nav').style.display='none';
+    // Render avatar grid
+    const grid=document.getElementById('ob-avatar-grid');
+    grid.innerHTML=AVATARS.map(a=>
+      `<button onclick="Onboarding.pickAvatar('${a}',this)" class="text-3xl p-2 rounded-xl hover:bg-primary-100 transition-colors btn-press ${a===this._avatar?'bg-primary-100 ring-2 ring-primary-400':''}" data-av="${a}">${a}</button>`
+    ).join('');
+    // Pre-fill if editing
+    if(GS.d.username) document.getElementById('ob-name').value=GS.d.username;
+    if(GS.d.avatar) { this._avatar=GS.d.avatar; document.getElementById('ob-avatar-preview').textContent=GS.d.avatar; }
+    if(GS.d.goal) this._goal=GS.d.goal;
+  },
+  goStep(n) {
+    // Validate step 2
+    if(n===3) {
+      const name=document.getElementById('ob-name').value.trim();
+      if(!name) { document.getElementById('ob-name').focus(); document.getElementById('ob-name').classList.add('animate-shake'); setTimeout(()=>document.getElementById('ob-name').classList.remove('animate-shake'),500); return; }
+    }
+    for(let i=1;i<=4;i++) document.getElementById('ob-step'+i).classList.add('hidden');
+    document.getElementById('ob-step'+n).classList.remove('hidden');
+    SoundFX.playClick();
+  },
+  pickAvatar(av, btn) {
+    this._avatar=av;
+    document.getElementById('ob-avatar-preview').textContent=av;
+    document.querySelectorAll('#ob-avatar-grid button').forEach(b=>{ b.classList.remove('bg-primary-100','ring-2','ring-primary-400'); });
+    btn.classList.add('bg-primary-100','ring-2','ring-primary-400');
+    SoundFX.playPop();
+  },
+  setGoal(g) {
+    this._goal=g;
+    ['both','cn','en'].forEach(id=>{
+      const el=document.getElementById('ob-goal-'+id);
+      if(id===g) { el.classList.add('border-primary-300','bg-primary-50'); el.classList.remove('border-gray-200','bg-white'); }
+      else { el.classList.remove('border-primary-300','bg-primary-50'); el.classList.add('border-gray-200','bg-white'); }
+    });
+    SoundFX.playClick();
+  },
+  finish() {
+    const name=document.getElementById('ob-name').value.trim()||'นักสำรวจ';
+    GS.d.username=name;
+    GS.d.avatar=this._avatar;
+    GS.d.goal=this._goal;
+    GS.d.profileSetup=true;
+    GS.save();
+    document.getElementById('onboarding').classList.add('hidden');
+    document.getElementById('header').style.display='';
+    document.querySelector('nav').style.display='';
+    SoundFX.playLevelUp();
+    try{confetti({particleCount:120,spread:80});}catch(e){}
+    App.toast(`🎉 ยินดีต้อนรับ ${name}!`);
+    App.renderDashboard();
+  }
+};
+
+// ============================================================================
+// PROFILE EDITOR — Edit profile via modal
+// ============================================================================
+const ProfileEditor = {
+  show() {
+    const d=GS.d;
+    Modal.show(`
+      <h2 class="text-lg font-bold text-gray-800 mb-4">✏️ แก้ไขโปรไฟล์</h2>
+      <div class="text-center mb-4">
+        <div class="w-16 h-16 mx-auto bg-gradient-to-br from-primary-400 to-accent-400 rounded-full flex items-center justify-center text-3xl mb-2 shadow-lg" id="pe-avatar-preview">${d.avatar||'🧑‍🎓'}</div>
+      </div>
+      <div class="mb-4">
+        <label class="text-sm font-bold text-gray-600 mb-1 block">ชื่อเล่น</label>
+        <input id="pe-name" type="text" value="${d.username||''}" maxlength="20" placeholder="ชื่อเล่นของคุณ..."
+          class="w-full px-4 py-2.5 rounded-xl border-2 border-gray-200 text-center font-bold focus:outline-none focus:border-primary-500 transition-colors bg-white">
+      </div>
+      <div class="mb-4">
+        <label class="text-sm font-bold text-gray-600 mb-1 block">Avatar</label>
+        <div class="grid grid-cols-5 gap-1.5 max-h-[200px] overflow-y-auto" id="pe-avatar-grid">
+          ${AVATARS.map(a=>
+            `<button onclick="ProfileEditor.pickAvatar('${a}',this)" class="text-2xl p-1.5 rounded-xl hover:bg-primary-100 transition-colors btn-press ${a===(d.avatar||'🧑‍🎓')?'bg-primary-100 ring-2 ring-primary-400':''}">${a}</button>`
+          ).join('')}
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="text-sm font-bold text-gray-600 mb-1 block">เป้าหมาย</label>
+        <div class="flex gap-2">
+          <button onclick="ProfileEditor.setGoal('both')" id="pe-goal-both" class="flex-1 py-2 rounded-xl text-sm font-bold btn-press ${d.goal==='both'?'bg-primary-100 text-primary-700 border-2 border-primary-300':'bg-gray-100 text-gray-500 border-2 border-gray-200'}">🌏 ทั้งสอง</button>
+          <button onclick="ProfileEditor.setGoal('cn')" id="pe-goal-cn" class="flex-1 py-2 rounded-xl text-sm font-bold btn-press ${d.goal==='cn'?'bg-red-100 text-red-700 border-2 border-red-300':'bg-gray-100 text-gray-500 border-2 border-gray-200'}">🇨🇳 จีน</button>
+          <button onclick="ProfileEditor.setGoal('en')" id="pe-goal-en" class="flex-1 py-2 rounded-xl text-sm font-bold btn-press ${d.goal==='en'?'bg-blue-100 text-blue-700 border-2 border-blue-300':'bg-gray-100 text-gray-500 border-2 border-gray-200'}">🇬🇧 อังกฤษ</button>
+        </div>
+      </div>
+      <button onclick="ProfileEditor.save()" class="w-full py-3 bg-gradient-to-r from-primary-500 to-accent-500 text-white rounded-xl font-bold btn-press">💾 บันทึก</button>
+      <button onclick="Modal.hide()" class="w-full py-2 mt-2 text-gray-500 text-sm font-semibold btn-press">ยกเลิก</button>
+      <hr class="my-3 border-gray-200">
+      <div class="text-center">
+        <button onclick="ProfileEditor.resetData()" class="text-xs text-red-400 hover:text-red-600 btn-press">🗑️ ลบข้อมูลทั้งหมด (Reset)</button>
+      </div>
+    `);
+    this._selectedAvatar=d.avatar||'🧑‍🎓';
+    this._selectedGoal=d.goal||'both';
+  },
+  _selectedAvatar: '🧑‍🎓',
+  _selectedGoal: 'both',
+  pickAvatar(av, btn) {
+    this._selectedAvatar=av;
+    document.getElementById('pe-avatar-preview').textContent=av;
+    document.querySelectorAll('#pe-avatar-grid button').forEach(b=>{ b.classList.remove('bg-primary-100','ring-2','ring-primary-400'); });
+    btn.classList.add('bg-primary-100','ring-2','ring-primary-400');
+    SoundFX.playPop();
+  },
+  setGoal(g) {
+    this._selectedGoal=g;
+    const styles={both:['bg-primary-100','text-primary-700','border-primary-300'],cn:['bg-red-100','text-red-700','border-red-300'],en:['bg-blue-100','text-blue-700','border-blue-300']};
+    ['both','cn','en'].forEach(id=>{
+      const el=document.getElementById('pe-goal-'+id);
+      if(!el) return;
+      el.className=`flex-1 py-2 rounded-xl text-sm font-bold btn-press ${id===g?styles[id].join(' ')+' border-2':'bg-gray-100 text-gray-500 border-2 border-gray-200'}`;
+    });
+    SoundFX.playClick();
+  },
+  save() {
+    const name=document.getElementById('pe-name').value.trim();
+    if(!name) { document.getElementById('pe-name').focus(); return; }
+    GS.d.username=name;
+    GS.d.avatar=this._selectedAvatar;
+    GS.d.goal=this._selectedGoal;
+    GS.save();
+    Modal.hide();
+    App.toast('✅ บันทึกโปรไฟล์แล้ว!');
+    SoundFX.playCorrect();
+    Profile.render();
+    App.renderDashboard();
+  },
+  resetData() {
+    if(confirm('⚠️ คุณแน่ใจหรือไม่?\n\nข้อมูลทั้งหมดจะถูกลบ:\n- ระดับ, XP, เหรียญ\n- Streak\n- คำศัพท์ที่เรียน\n- ความก้าวหน้าทั้งหมด\n\nข้อมูลจะไม่สามารถกู้คืนได้!')) {
+      localStorage.removeItem('lq_state');
+      localStorage.removeItem('lq_srs');
+      location.reload();
+    }
+  }
+};
+
+// ============================================================================
+// APP CONTROLLER
+// ============================================================================
+const App = {
+  init() {
+    GS.load();
+    SRS.load();
+    // Check if profile setup is needed (first time)
+    if(!GS.d.profileSetup) {
+      Onboarding.show();
+    }
+    GS.recordActivity();
+    GS.updateUI();
+    this.renderDashboard();
+    SRS.updateReviewUI();
+  },
+  showPage(id) {
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    const page=document.getElementById('page-'+id);
+    if(page) page.classList.add('active');
+    // Nav
+    document.querySelectorAll('.nav-item').forEach(n=>{ n.classList.remove('active'); n.querySelector('.nav-dot').style.display='none'; });
+    const navMap={dashboard:'dashboard',units:'learn',lesson:'learn',games:'games',gameplay:'games',review:'review',profile:'profile'};
+    const navBtn=document.querySelector(`.nav-item[data-nav="${navMap[id]||id}"]`);
+    if(navBtn) { navBtn.classList.add('active'); navBtn.querySelector('.nav-dot').style.display='block'; }
+    // Render profile if needed
+    if(id==='profile') Profile.render();
+    if(id==='review') SRS.updateReviewUI();
+    if(id==='dashboard') this.renderDashboard();
+    GS.updateUI();
+  },
+  showUnits(lang) {
+    this.showPage('units');
+    const vocab=lang==='cn'?VOCAB_CN:VOCAB_EN;
+    const title=lang==='cn'?'🇨🇳 ภาษาจีน — บทเรียน':'🇬🇧 ภาษาอังกฤษ — บทเรียน';
+    document.getElementById('unitsTitle').textContent=title;
+    const list=document.getElementById('unitsList');
+    list.innerHTML=Object.entries(vocab).map(([num,unit])=>{
+      const completed=GS.d.completedUnits[lang]?.[num];
+      const stars=GS.d.unitStars[lang]?.[num]||0;
+      const prevCompleted=num==='1'||GS.d.completedUnits[lang]?.[String(parseInt(num)-1)];
+      const locked=!prevCompleted&&!completed;
+      const starStr=completed?'⭐'.repeat(stars)+'☆'.repeat(3-stars):'';
+      const color=lang==='cn'?'from-red-50 to-red-100 border-red-200':'from-blue-50 to-blue-100 border-blue-200';
+      return `<div class="unit-card glass rounded-2xl p-4 card-shadow flex items-center gap-4 ${locked?'locked':''}" ${locked?'':`onclick="Lesson.start('${lang}',${num})"`}>
+        <div class="text-3xl w-14 h-14 bg-gradient-to-br ${color} rounded-2xl flex items-center justify-center border-2">${unit.icon}</div>
+        <div class="flex-1">
+          <div class="font-bold text-gray-800">${locked?'🔒 ':''} Unit ${num}: ${lang==='cn'?unit.name:unit.name}</div>
+          <div class="text-xs text-gray-500">${lang==='cn'?unit.nameEn:unit.nameTh} • ${unit.words.length} คำ</div>
+          ${completed?`<div class="text-sm mt-1">${starStr}</div>`:''}
+        </div>
+        ${completed?'<span class="text-green-500 text-xl">✅</span>':locked?'<span class="text-gray-400">🔒</span>':'<span class="text-primary-500 font-bold text-sm">เริ่ม →</span>'}
+      </div>`;
+    }).join('');
+  },
+  renderDashboard() {
+    const d=GS.d;
+    // Show user profile on dashboard
+    const username=d.username||'นักสำรวจ';
+    const avatar=d.avatar||'🌏';
+    document.getElementById('dashAvatar').textContent=avatar;
+    // Greeting
+    const h=new Date().getHours();
+    const greet=h<12?'สวัสดีตอนเช้า ☀️':h<17?'สวัสดีตอนบ่าย 🌤️':'สวัสดีตอนเย็น 🌙';
+    document.getElementById('dashName').textContent=`${greet} ${username}!`;
+    document.getElementById('dashGreeting').textContent='มาเรียนภาษากันเถอะ!';
+
+    // Quests
+    const questList=document.getElementById('questList');
+    questList.innerHTML=(d.quests||[]).map(q=>`
+      <div class="flex items-center gap-2 p-2 rounded-xl ${q.done?'bg-green-50':'bg-gray-50'}">
+        <span class="text-lg">${q.done?'✅':'⬜'}</span>
+        <span class="flex-1 text-sm ${q.done?'text-green-600 line-through':'text-gray-700'}">${q.desc}</span>
+        <span class="text-xs text-gray-400">+${q.xp}XP +${q.coins}🪙</span>
+      </div>
+    `).join('');
+
+    // Progress
+    const cnTotal=Object.keys(VOCAB_CN).length;
+    const cnDone=Object.keys(d.completedUnits.cn||{}).length;
+    const enTotal=Object.keys(VOCAB_EN).length;
+    const enDone=Object.keys(d.completedUnits.en||{}).length;
+    document.getElementById('cnProgress').textContent=`${Math.round(cnDone/cnTotal*100)}% สำเร็จ (${cnDone}/${cnTotal})`;
+    document.getElementById('enProgress').textContent=`${Math.round(enDone/enTotal*100)}% สำเร็จ (${enDone}/${enTotal})`;
+
+    // Leaderboard preview
+    const players=[...d.bots||[],{name:d.username||'คุณ',flag:d.avatar||'⭐',xp:d.xp,isUser:true}];
+    players.sort((a,b)=>b.xp-a.xp);
+    const top3=players.slice(0,3);
+    document.getElementById('leaderPreview').innerHTML=top3.map((p,i)=>`
+      <div class="flex items-center gap-1 ${p.isUser?'bg-primary-100 px-2 py-1 rounded-lg':''}">
+        <span class="text-xs">${['🥇','🥈','🥉'][i]}</span>
+        <span class="text-xs font-bold">${p.name}</span>
+      </div>
+    `).join('');
+
+    // Quest timer
+    const now=new Date();
+    const midnight=new Date(now); midnight.setHours(24,0,0,0);
+    const diff=midnight-now;
+    const hh=Math.floor(diff/3600000);
+    const mm=Math.floor((diff%3600000)/60000);
+    document.getElementById('questTimer').textContent=`รีเซ็ตใน ${hh}ชม ${mm}น`;
+
+    GS.updateUI();
+  },
+  toast(msg) {
+    const t=document.getElementById('toast');
+    t.innerHTML=msg;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  }
+};
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded',()=>App.init());
+
+// Update nav dot visibility
+document.querySelectorAll('.nav-dot').forEach(d=>d.style.display='none');
+document.querySelector('.nav-item.active .nav-dot').style.display='block';
+</script>
+</body>
+</html>
